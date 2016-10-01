@@ -16,13 +16,9 @@ namespace MonitorSwitcherGUI
     /// </summary>
     public class CCDWrapper
     {
-        #region SdcFlags enum
-
         [Flags]
         public enum SdcFlags : uint
         {
-            Zero = 0,
-
             TopologyInternal = 0x00000001,
             TopologyClone = 0x00000002,
             TopologyExtend = 0x00000004,
@@ -40,26 +36,6 @@ namespace MonitorSwitcherGUI
             AllowPathOrderChanges = 0x00002000,
 
             UseDatabaseCurrent = TopologyInternal | TopologyClone | TopologyExtend | TopologyExternal
-        }
-
-        [Flags]
-        public enum DisplayConfigFlags : uint
-        {
-            Zero = 0x0,
-            PathActive = 0x00000001
-        }
-
-        [Flags]
-        public enum DisplayConfigPixelFormat : uint
-        {
-            Zero = 0x0,
-
-            Pixelformat8Bpp = 1,
-            Pixelformat16Bpp = 2,
-            Pixelformat24Bpp = 3,
-            Pixelformat32Bpp = 4,
-            PixelformatNongdi = 5,
-            PixelformatForceUint32 = 0xffffffff
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -80,11 +56,8 @@ namespace MonitorSwitcherGUI
         [Flags]
         public enum DisplayConfigModeInfoType : uint
         {
-            Zero = 0,
-
             Source = 1,
             Target = 2,
-            ForceUint32 = 0xFFFFFFFF
         }
 
         [StructLayout(LayoutKind.Explicit)]
@@ -118,44 +91,6 @@ namespace MonitorSwitcherGUI
             public uint cy;
         }
 
-        [Flags]
-        public enum D3DmdtVideoSignalStandard : uint
-        {
-            Uninitialized = 0,
-            VesaDmt = 1,
-            VesaGtf = 2,
-            VesaCvt = 3,
-            Ibm = 4,
-            Apple = 5,
-            NtscM = 6,
-            NtscJ = 7,
-            Ntsc443 = 8,
-            PalB = 9,
-            PalB1 = 10,
-            PalG = 11,
-            PalH = 12,
-            PalI = 13,
-            PalD = 14,
-            PalN = 15,
-            PalNc = 16,
-            SecamB = 17,
-            SecamD = 18,
-            SecamG = 19,
-            SecamH = 20,
-            SecamK = 21,
-            SecamK1 = 22,
-            SecamL = 23,
-            SecamL1 = 24,
-            Eia861 = 25,
-            Eia861A = 26,
-            Eia861B = 27,
-            PalK = 28,
-            PalK1 = 29,
-            PalL = 30,
-            PalM = 31,
-            Other = 255
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         public struct DisplayConfigVideoSignalInfo
         {
@@ -164,14 +99,7 @@ namespace MonitorSwitcherGUI
             public DisplayConfigRational vSyncFreq;
             public DisplayConfig2DRegion activeSize;
             public DisplayConfig2DRegion totalSize;
-
-            [XmlIgnore]
-            public D3DmdtVideoSignalStandard videoStandard;
-
-            [XmlElement("videoStandard")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint videoStandardValue { get { return (uint)videoStandard; } set { videoStandard = (D3DmdtVideoSignalStandard)value; } }
-
+            public uint videoStandard;
             public uint scanLineOrdering;
         }
 
@@ -193,14 +121,7 @@ namespace MonitorSwitcherGUI
         {
             public uint width;
             public uint height;
-
-            [XmlIgnore]
-            public DisplayConfigPixelFormat pixelFormat;
-            
-            [XmlElement("pixelFormat")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint pixelFormatValue { get { return (uint)pixelFormat; } set { pixelFormat = (DisplayConfigPixelFormat)value; } }
-
+            public uint pixelFormat;
             public PointL position;
         }
 
@@ -231,27 +152,10 @@ namespace MonitorSwitcherGUI
         [Flags]
         public enum QueryDisplayFlags : uint
         {
-            Zero = 0x0,
-
             AllPaths = 0x00000001,
             OnlyActivePaths = 0x00000002,
             DatabaseCurrent = 0x00000004
         }
-
-        [Flags]
-        public enum DisplayConfigTopologyId : uint
-        {
-            Zero = 0x0,
-
-            Internal = 0x00000001,
-            Clone = 0x00000002,
-            Extend = 0x00000004,
-            External = 0x00000008,
-            ForceUint32 = 0xFFFFFFFF
-        }
-
-
-        #endregion
 
         [DllImport("User32.dll")]
         public static extern int SetDisplayConfig(
@@ -274,90 +178,5 @@ namespace MonitorSwitcherGUI
 
         [DllImport("User32.dll")]
         public static extern int GetDisplayConfigBufferSizes(QueryDisplayFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
-
-        public enum DisplayConfigDeviceInfoType : uint
-        {
-            GetSourceName = 1,
-            GetTargetName = 2,
-            GetTargetPreferredMode = 3,
-            GetAdapterName = 4,
-            SetTargetPersistence = 5,
-        }
-
-        /// <summary>
-        /// Use this enum so that you don't have to hardcode magic values.
-        /// </summary>
-        public enum StatusCode : uint
-        {
-            Success = 0,
-            InvalidParameter = 87,
-            NotSupported = 50,
-            AccessDenied = 5,
-            GenFailure = 31,
-            BadConfiguration = 1610,
-            InSufficientBuffer = 122,
-        }
-
-        /// <summary>
-        /// Just an contract.
-        /// </summary>
-        public interface IDisplayConfigInfo
-        {
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct DisplayConfigDeviceInfoHeader
-        {
-            [XmlIgnore]
-            public DisplayConfigDeviceInfoType type;
-
-            [XmlElement("type")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint typeValue { get { return (uint)type; } set { type = (DisplayConfigDeviceInfoType)value; } }
-
-            public int size;
-            public long adapterId;
-            public uint id;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct DisplayConfigSourceDeviceName : IDisplayConfigInfo
-        {
-            private const int Cchdevicename = 32;
-
-            public DisplayConfigDeviceInfoHeader header;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = Cchdevicename)]
-            public string viewGdiDeviceName;
-        }
-
-        [DllImport("User32.dll")]
-        private static extern StatusCode DisplayConfigGetDeviceInfo(IntPtr requestPacket);
-        public static StatusCode DisplayConfigGetDeviceInfo<T>(ref T displayConfig) where T : IDisplayConfigInfo
-        {
-            return MarshalStructureAndCall(ref displayConfig, DisplayConfigGetDeviceInfo);
-        }
-
-        /// <summary>
-        /// The idea of this method is to make sure we have type-safety, without any stupid overloads.
-        /// Without this, you would need to marshal yourself everything when using DisplayConfigGetDeviceInfo,
-        /// or SetDeviceInfo, without any type-safety. 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="displayConfig"></param>
-        /// <param name="func"></param>
-        /// <returns></returns>
-        private static StatusCode MarshalStructureAndCall<T>(ref T displayConfig,
-            Func<IntPtr, StatusCode> func) where T : IDisplayConfigInfo
-        {
-            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(displayConfig));
-            Marshal.StructureToPtr(displayConfig, ptr, false);
-
-            var returnValue = func(ptr);
-
-            displayConfig = (T)Marshal.PtrToStructure(ptr, displayConfig.GetType());
-
-            Marshal.FreeHGlobal(ptr);
-            return returnValue;
-        }
     }
 }
