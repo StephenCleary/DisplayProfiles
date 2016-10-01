@@ -170,6 +170,13 @@ namespace MonitorSwitcherGUI
             SdcFlags flags
         );
 
+        public static void SetDisplayConfig(DisplayConfigPathInfo[] pathArray, DisplayConfigModeInfo[] modeInfoArray, SdcFlags flags)
+        {
+            var err = SetDisplayConfig((uint)pathArray.Length, pathArray, (uint)modeInfoArray.Length, modeInfoArray, flags);
+            if (err != NO_ERROR)
+                throw new Win32Exception(err);
+        }
+
         [DllImport("User32.dll")]
         public static extern int QueryDisplayConfig(
             QueryDisplayFlags flags,
