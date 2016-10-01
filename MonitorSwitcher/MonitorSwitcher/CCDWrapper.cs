@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -16,6 +17,9 @@ namespace MonitorSwitcherGUI
     /// </summary>
     public class CCDWrapper
     {
+        private const int NO_ERROR = 0;
+        private const int ERROR_INSUFICCIENT_BUFFER = 122;
+
         [Flags]
         public enum SdcFlags : uint
         {
@@ -178,5 +182,25 @@ namespace MonitorSwitcherGUI
 
         [DllImport("User32.dll")]
         public static extern int GetDisplayConfigBufferSizes(QueryDisplayFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
+
+        public static Tuple<DisplayConfigPathInfo[], DisplayConfigModeInfo[]> GetDisplayConfig(QueryDisplayFlags flags)
+        {
+            while (true)
+            {
+                uint numPathArrayElements, numModeInfoArrayElements;
+                var err = GetDisplayConfigBufferSizes(flags, out numPathArrayElements, out numModeInfoArrayElements);
+                if (err != NO_ERROR)
+                    throw new Win32Exception(err);
+
+                var pathArray = new DisplayConfigPathInfo[numPathArrayElements];
+                var modeArray = new DisplayConfigModeInfo[numModeInfoArrayElements];
+                err = QueryDisplayConfig(flags, ref numPathArrayElements, pathArray, ref numModeInfoArrayElements, modeArray, IntPtr.Zero);
+                if (err == ERROR_INSUFICCIENT_BUFFER)
+                    continue;
+                if (err != NO_ERROR)
+                    throw new Win32Exception(err);
+                return Tuple.Create(pathArray, modeArray);
+            }
+        }
     }
 }
