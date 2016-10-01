@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
 namespace MonitorSwitcherGUI
 {
@@ -173,7 +175,12 @@ namespace MonitorSwitcherGUI
         public struct DisplayConfigModeInfo
         {
             [FieldOffset((0))]
+            [XmlIgnore]
             public DisplayConfigModeInfoType infoType;
+
+            [XmlElement("infoType")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint infoTypeValue { get { return (uint)infoType; } set { infoType = (DisplayConfigModeInfoType)value; } }
 
             [FieldOffset(4)]
             public uint id;
@@ -242,8 +249,19 @@ namespace MonitorSwitcherGUI
             public DisplayConfig2DRegion activeSize;
             public DisplayConfig2DRegion totalSize;
 
+            [XmlIgnore]
             public D3DmdtVideoSignalStandard videoStandard;
+
+            [XmlElement("videoStandard")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint videoStandardValue { get { return (uint)videoStandard; } set { videoStandard = (D3DmdtVideoSignalStandard)value; } }
+
+            [XmlIgnore]
             public DisplayConfigScanLineOrdering ScanLineOrdering;
+
+            [XmlElement("ScanLineOrdering")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint ScanLineOrderingValue { get { return (uint)ScanLineOrdering; } set { ScanLineOrdering = (DisplayConfigScanLineOrdering)value; } }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -264,7 +282,14 @@ namespace MonitorSwitcherGUI
         {
             public uint width;
             public uint height;
+
+            [XmlIgnore]
             public DisplayConfigPixelFormat pixelFormat;
+            
+            [XmlElement("pixelFormat")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint pixelFormatValue { get { return (uint)pixelFormat; } set { pixelFormat = (DisplayConfigPixelFormat)value; } }
+
             public PointL position;
         }
 
@@ -275,7 +300,12 @@ namespace MonitorSwitcherGUI
             public uint id;
             public uint modeInfoIdx;
 
+            [XmlIgnore]
             public DisplayConfigSourceStatus statusFlags;
+
+            [XmlElement("statusFlags")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint statusFlagsValue { get { return (uint)statusFlags; } set { statusFlags = (DisplayConfigSourceStatus)value; } }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -284,14 +314,45 @@ namespace MonitorSwitcherGUI
             public LUID adapterId;
             public uint id;
             public uint modeInfoIdx;
-            public DisplayConfigVideoOutputTechnology outputTechnology; 
+
+            [XmlIgnore]
+            public DisplayConfigVideoOutputTechnology outputTechnology;
+
+            [XmlElement("outputTechnology")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint outputTechnologyValue { get { return (uint)outputTechnology; } set { outputTechnology = (DisplayConfigVideoOutputTechnology)value; } }
+
+            [XmlIgnore]
             public DisplayConfigRotation rotation;
+
+            [XmlElement("rotation")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint rotationValue { get { return (uint)rotation; } set { rotation = (DisplayConfigRotation)value; } }
+
+            [XmlIgnore]
             public DisplayConfigScaling scaling;
+
+            [XmlElement("scaling")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint scalingValue { get { return (uint)scaling; } set { scaling = (DisplayConfigScaling)value; } }
+
             public DisplayConfigRational refreshRate;
+
+            [XmlIgnore]
             public DisplayConfigScanLineOrdering scanLineOrdering;
 
+            [XmlElement("scanLineOrdering")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint scanLineOrderingValue { get { return (uint)scanLineOrdering; } set { scanLineOrdering = (DisplayConfigScanLineOrdering)value; } }
+
             public bool targetAvailable;
+
+            [XmlIgnore]
             public DisplayConfigTargetStatus statusFlags;
+
+            [XmlElement("statusFlags")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint statusFlagsValue { get { return (uint)statusFlags; } set { statusFlags = (DisplayConfigTargetStatus)value; } }
         }
 
         [Flags]
@@ -374,7 +435,13 @@ namespace MonitorSwitcherGUI
         [StructLayout(LayoutKind.Sequential)]
         public struct DisplayConfigDeviceInfoHeader
         {
+            [XmlIgnore]
             public DisplayConfigDeviceInfoType type;
+
+            [XmlElement("type")]
+            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+            public uint typeValue { get { return (uint)type; } set { type = (DisplayConfigDeviceInfoType)value; } }
+
             public int size;
             public LUID adapterId;
             public uint id;
