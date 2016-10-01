@@ -16,28 +16,6 @@ namespace MonitorSwitcherGUI
     /// </summary>
     public class CCDWrapper
     {
-        [Flags]
-        public enum DisplayConfigVideoOutputTechnology : uint
-        {
-            Other = 4294967295, // -1
-            Hd15 = 0,
-            Svideo = 1,
-            CompositeVideo = 2,
-            ComponentVideo = 3,
-            Dvi = 4,
-            Hdmi = 5,
-            Lvds = 6,
-            DJpn = 8,
-            Sdi = 9,
-            DisplayportExternal = 10,
-            DisplayportEmbedded = 11,
-            UdiExternal = 12,
-            UdiEmbedded = 13,
-            Sdtvdongle = 14,
-            Internal = 0x80000000,
-            ForceUint32 = 0xFFFFFFFF
-        }
-
         #region SdcFlags enum
 
         [Flags]
@@ -72,30 +50,6 @@ namespace MonitorSwitcherGUI
         }
 
         [Flags]
-        public enum DisplayConfigTargetStatus : uint
-        {
-            Zero = 0x0,
-
-            InUse                         = 0x00000001,
-            FORCIBLE                       = 0x00000002,
-            ForcedAvailabilityBoot       = 0x00000004,
-            ForcedAvailabilityPath       = 0x00000008,
-            ForcedAvailabilitySystem     = 0x00000010,
-        }
-
-        [Flags]
-        public enum DisplayConfigRotation : uint
-        {
-            Zero = 0x0,
-
-            Identity = 1,
-            Rotate90 = 2,
-            Rotate180 = 3,
-            Rotate270 = 4,
-            ForceUint32 = 0xFFFFFFFF
-        }
-
-        [Flags]
         public enum DisplayConfigPixelFormat : uint
         {
             Zero = 0x0,
@@ -108,36 +62,11 @@ namespace MonitorSwitcherGUI
             PixelformatForceUint32 = 0xffffffff
         }
 
-        [Flags]
-        public enum DisplayConfigScaling : uint
-        {
-            Zero = 0x0, 
-
-            Identity = 1,
-            Centered = 2,
-            Stretched = 3,
-            Aspectratiocenteredmax = 4,
-            Custom = 5,
-            Preferred = 128,
-            ForceUint32 = 0xFFFFFFFF
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         public struct DisplayConfigRational
         {
             public uint numerator;
             public uint denominator;
-        }
-
-        [Flags]
-        public enum DisplayConfigScanLineOrdering : uint
-        {
-            Unspecified = 0,
-            Progressive = 1,
-            Interlaced = 2,
-            InterlacedUpperfieldfirst = Interlaced,
-            InterlacedLowerfieldfirst = 3,
-            ForceUint32 = 0xFFFFFFFF
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -243,12 +172,7 @@ namespace MonitorSwitcherGUI
             [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
             public uint videoStandardValue { get { return (uint)videoStandard; } set { videoStandard = (D3DmdtVideoSignalStandard)value; } }
 
-            [XmlIgnore]
-            public DisplayConfigScanLineOrdering ScanLineOrdering;
-
-            [XmlElement("ScanLineOrdering")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint ScanLineOrderingValue { get { return (uint)ScanLineOrdering; } set { ScanLineOrdering = (DisplayConfigScanLineOrdering)value; } }
+            public uint scanLineOrdering;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -295,45 +219,13 @@ namespace MonitorSwitcherGUI
             public long adapterId;
             public uint id;
             public uint modeInfoIdx;
-
-            [XmlIgnore]
-            public DisplayConfigVideoOutputTechnology outputTechnology;
-
-            [XmlElement("outputTechnology")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint outputTechnologyValue { get { return (uint)outputTechnology; } set { outputTechnology = (DisplayConfigVideoOutputTechnology)value; } }
-
-            [XmlIgnore]
-            public DisplayConfigRotation rotation;
-
-            [XmlElement("rotation")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint rotationValue { get { return (uint)rotation; } set { rotation = (DisplayConfigRotation)value; } }
-
-            [XmlIgnore]
-            public DisplayConfigScaling scaling;
-
-            [XmlElement("scaling")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint scalingValue { get { return (uint)scaling; } set { scaling = (DisplayConfigScaling)value; } }
-
+            public uint outputTechnology;
+            public uint rotation;
+            public uint scaling;
             public DisplayConfigRational refreshRate;
-
-            [XmlIgnore]
-            public DisplayConfigScanLineOrdering scanLineOrdering;
-
-            [XmlElement("scanLineOrdering")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint scanLineOrderingValue { get { return (uint)scanLineOrdering; } set { scanLineOrdering = (DisplayConfigScanLineOrdering)value; } }
-
+            public uint scanLineOrdering;
             public bool targetAvailable;
-
-            [XmlIgnore]
-            public DisplayConfigTargetStatus statusFlags;
-
-            [XmlElement("statusFlags")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint statusFlagsValue { get { return (uint)statusFlags; } set { statusFlags = (DisplayConfigTargetStatus)value; } }
+            public uint statusFlags;
         }
 
         [Flags]
