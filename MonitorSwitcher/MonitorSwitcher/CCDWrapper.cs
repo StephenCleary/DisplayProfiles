@@ -12,16 +12,10 @@ namespace MonitorSwitcherGUI
     /// This class takes care of wrapping "Connecting and Configuring Displays(CCD) Win32 API"
     /// Author Erti-Chris Eelmaa || easter199 at hotmail dot com
     /// Modifications made by Martin Krämer || martinkraemer84 at gmail dot com
+    /// Further modifications and drastic simplification by Stephen Cleary || stephencleary.com
     /// </summary>
     public class CCDWrapper
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct LUID
-        {
-            public uint LowPart;
-            public uint HighPart;
-        }
-
         [Flags]
         public enum DisplayConfigVideoOutputTechnology : uint
         {
@@ -75,13 +69,6 @@ namespace MonitorSwitcherGUI
         {
             Zero = 0x0,
             PathActive = 0x00000001
-        }
-
-        [Flags]
-        public enum DisplayConfigSourceStatus
-        {
-            Zero = 0x0,
-            InUse = 0x00000001
         }
 
         [Flags]
@@ -186,7 +173,7 @@ namespace MonitorSwitcherGUI
             public uint id;
 
             [FieldOffset(8)]
-            public LUID adapterId;
+            public long adapterId;
 
             [FieldOffset(16)]
             public DisplayConfigTargetMode targetMode;
@@ -296,22 +283,16 @@ namespace MonitorSwitcherGUI
         [StructLayout(LayoutKind.Sequential)]
         public struct DisplayConfigPathSourceInfo
         {
-            public LUID adapterId;
+            public long adapterId;
             public uint id;
             public uint modeInfoIdx;
-
-            [XmlIgnore]
-            public DisplayConfigSourceStatus statusFlags;
-
-            [XmlElement("statusFlags")]
-            [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-            public uint statusFlagsValue { get { return (uint)statusFlags; } set { statusFlags = (DisplayConfigSourceStatus)value; } }
+            public uint statusFlags;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct DisplayConfigPathTargetInfo
         {
-            public LUID adapterId;
+            public long adapterId;
             public uint id;
             public uint modeInfoIdx;
 
@@ -443,7 +424,7 @@ namespace MonitorSwitcherGUI
             public uint typeValue { get { return (uint)type; } set { type = (DisplayConfigDeviceInfoType)value; } }
 
             public int size;
-            public LUID adapterId;
+            public long adapterId;
             public uint id;
         }
 

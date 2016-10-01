@@ -30,7 +30,7 @@ namespace MonitorSwitcherGUI
             System.Xml.Serialization.XmlSerializer readerModeTarget = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigTargetMode));
             System.Xml.Serialization.XmlSerializer readerModeSource = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigSourceMode));
             System.Xml.Serialization.XmlSerializer readerModeInfoType = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigModeInfoType));
-            System.Xml.Serialization.XmlSerializer readerModeAdapterID = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.LUID));
+            System.Xml.Serialization.XmlSerializer readerModeAdapterID = new System.Xml.Serialization.XmlSerializer(typeof(long));
 
             // Lists for storing the results
             List<CCDWrapper.DisplayConfigPathInfo> pathInfoList = new List<CCDWrapper.DisplayConfigPathInfo>();
@@ -55,7 +55,7 @@ namespace MonitorSwitcherGUI
                     modeInfo.id = Convert.ToUInt32(xml.Value);
                     xml.Read();
                     xml.Read();
-                    modeInfo.adapterId = (CCDWrapper.LUID)readerModeAdapterID.Deserialize(xml);
+                    modeInfo.adapterId = (long)readerModeAdapterID.Deserialize(xml);
                     modeInfo.infoType = (CCDWrapper.DisplayConfigModeInfoType)readerModeInfoType.Deserialize(xml);
                     if (modeInfo.infoType == CCDWrapper.DisplayConfigModeInfoType.Target)
                     {
@@ -106,8 +106,8 @@ namespace MonitorSwitcherGUI
                         if ((pathInfoArray[iPathInfo].sourceInfo.id == pathInfoArrayCurrent[iPathInfoCurrent].sourceInfo.id) &&
                             (pathInfoArray[iPathInfo].targetInfo.id == pathInfoArrayCurrent[iPathInfoCurrent].targetInfo.id))
                         {
-                            pathInfoArray[iPathInfo].sourceInfo.adapterId.LowPart = pathInfoArrayCurrent[iPathInfoCurrent].sourceInfo.adapterId.LowPart;
-                            pathInfoArray[iPathInfo].targetInfo.adapterId.LowPart = pathInfoArrayCurrent[iPathInfoCurrent].targetInfo.adapterId.LowPart;
+                            pathInfoArray[iPathInfo].sourceInfo.adapterId = pathInfoArrayCurrent[iPathInfoCurrent].sourceInfo.adapterId;
+                            pathInfoArray[iPathInfo].targetInfo.adapterId = pathInfoArrayCurrent[iPathInfoCurrent].targetInfo.adapterId;
                             break;
                         }
                     }
@@ -125,14 +125,14 @@ namespace MonitorSwitcherGUI
                             for (int iModeInfoSource = 0; iModeInfoSource < modeInfoArray.Length; iModeInfoSource++)
                             {
                                 if ((modeInfoArray[iModeInfoSource].id == pathInfoArray[iPathInfo].sourceInfo.id) &&
-                                    (modeInfoArray[iModeInfoSource].adapterId.LowPart == modeInfoArray[iModeInfo].adapterId.LowPart) &&
+                                    (modeInfoArray[iModeInfoSource].adapterId == modeInfoArray[iModeInfo].adapterId) &&
                                     (modeInfoArray[iModeInfoSource].infoType == CCDWrapper.DisplayConfigModeInfoType.Source))
                                 {
-                                    modeInfoArray[iModeInfoSource].adapterId.LowPart = pathInfoArray[iPathInfo].sourceInfo.adapterId.LowPart;
+                                    modeInfoArray[iModeInfoSource].adapterId = pathInfoArray[iPathInfo].sourceInfo.adapterId;
                                     break;
                                 }
                             }
-                            modeInfoArray[iModeInfo].adapterId.LowPart = pathInfoArray[iPathInfo].targetInfo.adapterId.LowPart;
+                            modeInfoArray[iModeInfo].adapterId = pathInfoArray[iPathInfo].targetInfo.adapterId;
                             break;
                         }                       
                     }                    
@@ -198,7 +198,7 @@ namespace MonitorSwitcherGUI
                 System.Xml.Serialization.XmlSerializer writerModeTarget = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigTargetMode));
                 System.Xml.Serialization.XmlSerializer writerModeSource = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigSourceMode));
                 System.Xml.Serialization.XmlSerializer writerModeInfoType = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.DisplayConfigModeInfoType));
-                System.Xml.Serialization.XmlSerializer writerModeAdapterID = new System.Xml.Serialization.XmlSerializer(typeof(CCDWrapper.LUID));
+                System.Xml.Serialization.XmlSerializer writerModeAdapterID = new System.Xml.Serialization.XmlSerializer(typeof(long));
                 XmlWriter xml = XmlWriter.Create(fileName);
 
                 xml.WriteStartDocument();
