@@ -42,14 +42,14 @@ namespace MonitorSwitcherGUI
             UseDatabaseCurrent = TopologyInternal | TopologyClone | TopologyExtend | TopologyExternal
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigRational
         {
             public uint numerator;
             public uint denominator;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigPathInfo
         {
             public DisplayConfigPathSourceInfo sourceInfo;
@@ -62,6 +62,7 @@ namespace MonitorSwitcherGUI
         {
             Source = 1,
             Target = 2,
+            _ = 0xFFFFFFFF
         }
 
         [StructLayout(LayoutKind.Explicit)]
@@ -88,17 +89,17 @@ namespace MonitorSwitcherGUI
             public DisplayConfigSourceMode sourceMode;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfig2DRegion
         {
             public uint cx;
             public uint cy;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigVideoSignalInfo
         {
-            public long pixelRate;
+            public ulong pixelRate;
             public DisplayConfigRational hSyncFreq;
             public DisplayConfigRational vSyncFreq;
             public DisplayConfig2DRegion activeSize;
@@ -107,20 +108,20 @@ namespace MonitorSwitcherGUI
             public uint scanLineOrdering;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigTargetMode
         {
             public DisplayConfigVideoSignalInfo targetVideoSignalInfo;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct PointL
         {
             public int x;
             public int y;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigSourceMode
         {
             public uint width;
@@ -129,7 +130,7 @@ namespace MonitorSwitcherGUI
             public PointL position;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigPathSourceInfo
         {
             public long adapterId;
@@ -138,7 +139,7 @@ namespace MonitorSwitcherGUI
             public uint statusFlags;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
         public struct DisplayConfigPathTargetInfo
         {
             public long adapterId;
@@ -149,7 +150,7 @@ namespace MonitorSwitcherGUI
             public uint scaling;
             public DisplayConfigRational refreshRate;
             public uint scanLineOrdering;
-            public bool targetAvailable;
+            public uint targetAvailable;
             public uint statusFlags;
         }
 
