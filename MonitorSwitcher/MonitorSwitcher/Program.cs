@@ -10,11 +10,20 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace MonitorSwitcherGUI
 {
     public class MonitorSwitcher
     {
+        private static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings { ContractResolver = DisplayConfigModeInfoContractResolver.Instance };
+
+        public static void LoadDisplaySettingsAndSetAsCurrent(string filename)
+        {
+            JsonConvert.DeserializeObject<DisplaySettings>(File.ReadAllText(filename), JsonSerializerSettings)
+                .UpdateAdapterIds()
+                .SetCurrent();
+        }
 
         public static Boolean LoadDisplaySettings(String fileName)
         {
@@ -184,6 +193,11 @@ namespace MonitorSwitcherGUI
             }
 
             return false;
+        }
+
+        public static void SaveCurrentDisplaySettings(string filename)
+        {
+            File.WriteAllText(filename, JsonConvert.SerializeObject(DisplaySettings.GetCurrent(activeOnly: true), JsonSerializerSettings));
         }
 
         public static Boolean SaveDisplaySettings(String fileName)

@@ -34,7 +34,7 @@ namespace MonitorSwitcherGUI
         public MonitorSwitcherGUI()
         {
             // Initialize settings directory
-            settingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"MonitorSwitcher");
+            settingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MonitorSwitcher");
             settingsDirectoryProfiles = Path.Combine(settingsDirectory, "Profiles");
             if (!Directory.Exists(settingsDirectory))
                 Directory.CreateDirectory(settingsDirectory);
@@ -66,7 +66,7 @@ namespace MonitorSwitcherGUI
             trayMenu.ImageList.Images.Add(new Icon(GetType(), "NewProfile.ico"));
             trayMenu.ImageList.Images.Add(new Icon(GetType(), "About.ico"));
             trayMenu.ImageList.Images.Add(new Icon(GetType(), "Hotkey.ico"));
-            BuildTrayMenu();            
+            BuildTrayMenu();
 
             // Create tray icon
             trayIcon = new NotifyIcon();
@@ -93,7 +93,7 @@ namespace MonitorSwitcherGUI
             {
                 foreach (Hotkey hotkey in removeList)
                 {
-                    Hotkeys.Remove(hotkey);                    
+                    Hotkeys.Remove(hotkey);
                 }
                 removeList.Clear();
                 SaveSettings();
@@ -104,26 +104,27 @@ namespace MonitorSwitcherGUI
             {
                 hotkey.UnregisterHotkey();
                 hotkey.RegisterHotkey(this);
-            }           
+            }
         }
 
         public void KeyHook_KeyUp(object sender, HandledEventArgs e)
         {
-            HotkeyCtrl hotkeyCtrl = (sender as HotkeyCtrl);   
+            HotkeyCtrl hotkeyCtrl = (sender as HotkeyCtrl);
             Hotkey hotkey = FindHotkey(hotkeyCtrl);
             LoadProfile(hotkey.profileName);
             e.Handled = true;
         }
 
         public void KeyHook_KeyDown(object sender, HandledEventArgs e)
-        {            
+        {
             e.Handled = true;
-        } 
+        }
 
         public void LoadSettings()
         {
             // Unregister and clear all existing hotkeys
-            foreach (Hotkey hotkey in Hotkeys) {
+            foreach (Hotkey hotkey in Hotkeys)
+            {
                 hotkey.UnregisterHotkey();
             }
             Hotkeys.Clear();
@@ -132,7 +133,7 @@ namespace MonitorSwitcherGUI
             if (!File.Exists(SettingsFileFromName("Hotkeys")))
                 return;
 
-            System.Xml.Serialization.XmlSerializer readerHotkey = new System.Xml.Serialization.XmlSerializer(typeof(Hotkey));           
+            System.Xml.Serialization.XmlSerializer readerHotkey = new System.Xml.Serialization.XmlSerializer(typeof(Hotkey));
 
             try
             {
@@ -142,7 +143,7 @@ namespace MonitorSwitcherGUI
                 {
                     if ((xml.Name.CompareTo("Hotkey") == 0) && (xml.IsStartElement()))
                     {
-                        Hotkey hotkey = (Hotkey)readerHotkey.Deserialize(xml);
+                        Hotkey hotkey = (Hotkey) readerHotkey.Deserialize(xml);
                         Hotkeys.Add(hotkey);
                         continue;
                     }
@@ -222,7 +223,7 @@ namespace MonitorSwitcherGUI
             trayMenu.Items.Add("-");
 
             // Find all profile files
-            string[] profiles = Directory.GetFiles(settingsDirectoryProfiles, "*.xml");
+            string[] profiles = Directory.GetFiles(settingsDirectoryProfiles, "*.json");
 
             // Add to load menu
             foreach (string profile in profiles)
@@ -239,7 +240,7 @@ namespace MonitorSwitcherGUI
             saveMenu.ImageIndex = 4;
             saveMenu.DropDown = new ToolStripDropDownMenu();
             saveMenu.DropDown.ImageList = trayMenu.ImageList;
-            trayMenu.Items.Add(saveMenu);            
+            trayMenu.Items.Add(saveMenu);
 
             newMenuItem = saveMenu.DropDownItems.Add("New Profile...");
             newMenuItem.Click += OnMenuSaveAs;
@@ -283,7 +284,7 @@ namespace MonitorSwitcherGUI
                 newMenuItem = hotkeyMenu.DropDownItems.Add(itemCaption + " " + hotkeyString);
                 newMenuItem.Tag = itemCaption;
                 newMenuItem.Click += OnHotkeySet;
-                newMenuItem.ImageIndex = 3;                
+                newMenuItem.ImageIndex = 3;
             }
 
             trayMenu.Items.Add("-");
@@ -303,7 +304,7 @@ namespace MonitorSwitcherGUI
 
         public string ProfileFileFromName(string name)
         {
-            string fileName = name + ".xml";
+            string fileName = name + ".json";
             string filePath = Path.Combine(settingsDirectoryProfiles, fileName);
 
             return filePath;
@@ -311,7 +312,7 @@ namespace MonitorSwitcherGUI
 
         public string SettingsFileFromName(string name)
         {
-            string fileName = name + ".xml";
+            string fileName = name + ".json";
             string filePath = Path.Combine(settingsDirectory, fileName);
 
             return filePath;
@@ -324,7 +325,7 @@ namespace MonitorSwitcherGUI
         }
 
         public void OnMenuAbout(object sender, EventArgs e)
-        { 
+        {
             MessageBox.Show("Monitor Profile Switcher by Martin Krämer \n(MartinKraemer84@gmail.com)\nVersion 0.5.2.0\nCopyright 2013-2016 \n\nhttps://sourceforge.net/projects/monitorswitcher/", "About Monitor Profile Switcher", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -341,7 +342,11 @@ namespace MonitorSwitcherGUI
 
                 if (profileName.Trim().Length > 0)
                 {
-                    if (!MonitorSwitcher.SaveDisplaySettings(ProfileFileFromName(profileName)))
+                    try
+                    {
+                        MonitorSwitcher.SaveCurrentDisplaySettings(ProfileFileFromName(profileName));
+                    }
+                    catch (Exception ex)
                     {
                         trayIcon.BalloonTipTitle = "Failed to save Multi Monitor profile";
                         trayIcon.BalloonTipText = "MonitorSwitcher was unable to save the current profile to a new profile with name\"" + profileName + "\"";
@@ -354,7 +359,7 @@ namespace MonitorSwitcherGUI
 
         public void OnHotkeySet(object sender, EventArgs e)
         {
-            string profileName = (((ToolStripMenuItem)sender).Tag as string);
+            string profileName = (((ToolStripMenuItem) sender).Tag as string);
             Hotkey hotkey = FindHotkey(profileName);
             Boolean isNewHotkey = false;
             if (hotkey == null)
@@ -384,7 +389,11 @@ namespace MonitorSwitcherGUI
 
         public void LoadProfile(string name)
         {
-            if (!MonitorSwitcher.LoadDisplaySettings(ProfileFileFromName(name)))
+            try
+            {
+                MonitorSwitcher.LoadDisplaySettingsAndSetAsCurrent(ProfileFileFromName(name));
+            }
+            catch (Exception ex)
             {
                 trayIcon.BalloonTipTitle = "Failed to load Multi Monitor profile";
                 trayIcon.BalloonTipText = "MonitorSwitcher was unable to load the previously saved profile \"" + name + "\"";
@@ -395,12 +404,16 @@ namespace MonitorSwitcherGUI
 
         public void OnMenuLoad(object sender, EventArgs e)
         {
-            LoadProfile(((ToolStripMenuItem)sender).Text);
+            LoadProfile(((ToolStripMenuItem) sender).Text);
         }
 
         public void OnMenuSave(object sender, EventArgs e)
         {
-            if (!MonitorSwitcher.SaveDisplaySettings(ProfileFileFromName(((ToolStripMenuItem)sender).Text)))
+            try
+            {
+                MonitorSwitcher.SaveCurrentDisplaySettings(ProfileFileFromName(((ToolStripMenuItem) sender).Text));
+            }
+            catch (Exception ex)
             {
                 trayIcon.BalloonTipTitle = "Failed to save Multi Monitor profile";
                 trayIcon.BalloonTipText = "MonitorSwitcher was unable to save the current profile to name\"" + ((ToolStripMenuItem)sender).Text + "\"";
