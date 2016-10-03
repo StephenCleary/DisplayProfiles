@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayProfilesLogic", "DisplayProfilesLogic\DisplayProfilesLogic.csproj", "{9E31D87E-78FD-4B35-A474-641247C6138B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayProfilesGui", "DisplayProfilesGui\DisplayProfilesGui.csproj", "{533CAD57-F2E4-4463-89DD-76B3D67FA823}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E31D87E-78FD-4B35-A474-641247C6138B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E31D87E-78FD-4B35-A474-641247C6138B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E31D87E-78FD-4B35-A474-641247C6138B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E31D87E-78FD-4B35-A474-641247C6138B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{533CAD57-F2E4-4463-89DD-76B3D67FA823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{533CAD57-F2E4-4463-89DD-76B3D67FA823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{533CAD57-F2E4-4463-89DD-76B3D67FA823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{533CAD57-F2E4-4463-89DD-76B3D67FA823}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

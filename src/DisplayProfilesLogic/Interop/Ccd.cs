@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
-namespace MonitorSwitcherGUI
+namespace DisplayProfiles.Interop
 {
-    /// <summary>
-    /// This class takes care of wrapping "Connecting and Configuring Displays(CCD) Win32 API"
-    /// Author Erti-Chris Eelmaa || easter199 at hotmail dot com
-    /// Modifications made by Martin Krämer || martinkraemer84 at gmail dot com
-    /// Further modifications and drastic simplification by Stephen Cleary || stephencleary.com
-    /// </summary>
-    public class CCDWrapper
+    public class Ccd
     {
         private const int NO_ERROR = 0;
         private const int ERROR_INSUFICCIENT_BUFFER = 122;
@@ -163,7 +153,7 @@ namespace MonitorSwitcherGUI
         }
 
         [DllImport("User32.dll")]
-        public static extern int SetDisplayConfig(
+        private static extern int SetDisplayConfig(
             uint numPathArrayElements,
             [In] DisplayConfigPathInfo[] pathArray,
             uint numModeInfoArrayElements,
@@ -179,7 +169,10 @@ namespace MonitorSwitcherGUI
         }
 
         [DllImport("User32.dll")]
-        public static extern int QueryDisplayConfig(
+        private static extern int GetDisplayConfigBufferSizes(QueryDisplayFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
+
+        [DllImport("User32.dll")]
+        private static extern int QueryDisplayConfig(
             QueryDisplayFlags flags,
             ref uint numPathArrayElements,
             [Out] DisplayConfigPathInfo[] pathInfoArray,
@@ -187,9 +180,6 @@ namespace MonitorSwitcherGUI
             [Out] DisplayConfigModeInfo[] modeInfoArray,
             IntPtr z
         );
-
-        [DllImport("User32.dll")]
-        public static extern int GetDisplayConfigBufferSizes(QueryDisplayFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
 
         public static Tuple<DisplayConfigPathInfo[], DisplayConfigModeInfo[]> GetDisplayConfig(QueryDisplayFlags flags)
         {
