@@ -44,9 +44,6 @@ namespace DisplayProfilesGui
         {
             contextMenuStrip.Items.Clear();
 
-            contextMenuStrip.Items.Add(new ToolStripLabel("Load Profile"));
-            contextMenuStrip.Items.Add(new ToolStripSeparator());
-
             // Find all profile files
             var profiles = Directory.GetFiles(SettingsProfilesDirectory, "*.json").Select(FileNameToProfileName).ToList();
 
@@ -55,16 +52,28 @@ namespace DisplayProfilesGui
                 contextMenuStrip.Items.Add(new ToolStripMenuItem(profile, Resources.Profile.ToBitmap(), (_, __) => LoadProfile(profile)));
 
             // Menu for saving items
-            contextMenuStrip.Items.Add(new ToolStripSeparator());
-            var saveMenu = new ToolStripMenuItem("Save Profile", Resources.SaveProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
-            contextMenuStrip.Items.Add(saveMenu);
-
-            saveMenu.DropDownItems.Add(new ToolStripMenuItem("New Profile...", Resources.NewProfile.ToBitmap(), OnMenuSaveAs));
-            saveMenu.DropDownItems.Add(new ToolStripSeparator());
+            var newProfileMenuItem = new ToolStripMenuItem("New Profile...", Resources.NewProfile.ToBitmap(), OnMenuSaveAs);
+            if (profiles.Count != 0)
+            {
+                contextMenuStrip.Items.Add(new ToolStripSeparator());
+                var saveMenu = new ToolStripMenuItem("Save Profile", Resources.SaveProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
+                saveMenu.DropDownItems.Add(newProfileMenuItem);
+                saveMenu.DropDownItems.Add(new ToolStripSeparator());
+                profiles.ForEach(x => saveMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.SaveProfile.ToBitmap(), (_, __) => SaveProfile(x))));
+                contextMenuStrip.Items.Add(saveMenu);
+            }
+            else
+            {
+                contextMenuStrip.Items.Add(newProfileMenuItem);
+            }
 
             // Menu for deleting items
-            var deleteMenu = new ToolStripMenuItem("Delete Profile", Resources.DeleteProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
-            contextMenuStrip.Items.Add(deleteMenu);
+            if (profiles.Count != 0)
+            {
+                var deleteMenu = new ToolStripMenuItem("Delete Profile", Resources.DeleteProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
+                profiles.ForEach(x => deleteMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.DeleteProfile.ToBitmap(), (_, __) => DeleteProfile(x))));
+                contextMenuStrip.Items.Add(deleteMenu);
+            }
 
             //// Menu for hotkeys
             //ToolStripMenuItem hotkeyMenu = new ToolStripMenuItem("Set Hotkeys");
@@ -76,8 +85,6 @@ namespace DisplayProfilesGui
             // Profile-specific sub-menu items
             foreach (var profile in profiles)
             {
-                saveMenu.DropDownItems.Add(new ToolStripMenuItem(profile, Resources.SaveProfile.ToBitmap(), (_, __) => SaveProfile(profile)));
-                deleteMenu.DropDownItems.Add(new ToolStripMenuItem(profile, Resources.DeleteProfile.ToBitmap(), (_, __) => DeleteProfile(profile)));
 
                 //string hotkeyString = "(No Hotkey)";
                 //// check if a hotkey is assigned
