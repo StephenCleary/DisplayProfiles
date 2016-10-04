@@ -8,6 +8,7 @@ namespace DisplayProfilesGui
 {
     public sealed class ApplicationSettings
     {
+        public int Version { get; } = 0;
         public List<HotkeySetting> Hotkeys { get; } = new List<HotkeySetting>();
 
         /// <summary>

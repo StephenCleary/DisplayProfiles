@@ -28,6 +28,7 @@ namespace DisplayProfiles
             Adapters = adapterData;
         }
 
+        public int Version { get; } = 0;
         public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; } = new List<NativeMethods.DisplayConfigPathInfo>();
         public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; } = new List<NativeMethods.DisplayConfigModeInfo>();
         public Dictionary<long, AdapterData> Adapters { get; } = new Dictionary<long, AdapterData>();
