@@ -30,10 +30,14 @@ namespace DisplayProfilesGui
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
-            if (m.Msg == DeviceChangeNotification.NativeMethods.WM_DEVICECHANGE)
-            {
-                Debug.WriteLine("Saw msg.");
-            }
+
+            if (m.Msg != DeviceChangeNotification.NativeMethods.WM_DEVICECHANGE)
+                return;
+            if (m.WParam == DeviceChangeNotification.NativeMethods.DBT_DEVICEQUERYREMOVE ||
+                m.WParam == DeviceChangeNotification.NativeMethods.DBT_DEVICEREMOVEPENDING ||
+                m.WParam == DeviceChangeNotification.NativeMethods.DBT_QUERYCHANGECONFIG)
+                return;
+            Debug.WriteLine("Saw msg.");
         }
 
         private void Rebuild()
