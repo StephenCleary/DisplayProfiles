@@ -20,19 +20,19 @@ namespace DisplayProfiles
         {
             PathInfo = new List<NativeMethods.DisplayConfigPathInfo>();
             ModeInfo = new List<NativeMethods.DisplayConfigModeInfo>();
-            AdapterNames = new Dictionary<long, string>();
+            Adapters = new Dictionary<long, AdapterData>();
         }
 
-        public DisplaySettings(IEnumerable<NativeMethods.DisplayConfigPathInfo> pathInfo, IEnumerable<NativeMethods.DisplayConfigModeInfo> modeInfo, Dictionary<long, string> adapterNames)
+        public DisplaySettings(IEnumerable<NativeMethods.DisplayConfigPathInfo> pathInfo, IEnumerable<NativeMethods.DisplayConfigModeInfo> modeInfo, Dictionary<long, AdapterData> adapterData)
         {
             PathInfo = pathInfo.ToList();
             ModeInfo = modeInfo.ToList();
-            AdapterNames = adapterNames;
+            Adapters = adapterData;
         }
 
         public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; }
         public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; }
-        public Dictionary<long, string> AdapterNames { get; }
+        public Dictionary<long, AdapterData> Adapters { get; }
 
         [JsonIgnore]
         public HashSet<string> MissingAdapters { get; } = new HashSet<string> ();
@@ -62,22 +62,40 @@ namespace DisplayProfiles
                 NativeMethods.QueryDisplayFlags.AllPaths;
 
             var arrays = NativeMethods.GetDisplayConfig(flags);
-            var names = new Dictionary<long, string>();
-            foreach (var adapterId in arrays.Item1.Select(x => x.sourceInfo.adapterId).Concat(arrays.Item1.Select(x => x.targetInfo.adapterId)).Concat(arrays.Item2.Select(x => x.adapterId)))
-                if (!names.ContainsKey(adapterId) && adapterId != 0) // Sometimes we see invalid adapterId's of 0 when switching.
-                    names.Add(adapterId, NativeMethods.GetAdapterName(adapterId));
+            var paths = arrays.Item1;
+            var modes = arrays.Item2;
+            var names = new Dictionary<long, AdapterData>();
+            foreach (var adapterId in paths.Select(x => x.sourceInfo.adapterId).Concat(paths.Select(x => x.targetInfo.adapterId)).Concat(modes.Select(x => x.adapterId)).Distinct())
+            {
+                // Sometimes we see invalid adapterId's of 0 when switching.
+                if (adapterId == 0)
+                    continue;
+                var data = new AdapterData(NativeMethods.GetAdapterName(adapterId));
+                foreach (var sourceId in paths.Where(x => x.sourceInfo.adapterId == adapterId).Select(x => x.sourceInfo.id)
+                    .Concat(modes.Where(x => x.adapterId == adapterId && x.infoType == NativeMethods.DisplayConfigModeInfoType.Source).Select(x => x.id)).Distinct())
+                {
+                    data.Sources.Add(sourceId, new SourceData(NativeMethods.GetSourceName(adapterId, sourceId)));
+                }
+                foreach (var targetId in paths.Where(x => x.targetInfo.adapterId == adapterId).Select(x => x.targetInfo.id)
+                    .Concat(modes.Where(x => x.adapterId == adapterId && x.infoType == NativeMethods.DisplayConfigModeInfoType.Target).Select(x => x.id)).Distinct())
+                {
+                    var targetNames = NativeMethods.GetTargetNames(adapterId, targetId);
+                    data.Targets.Add(targetId, new TargetData(targetNames.Item1, targetNames.Item2));
+                }
+                names.Add(adapterId, data);
+            }
             return new DisplaySettings(arrays.Item1, arrays.Item2, names);
         }
 
         private long UpdateAdapterId(long adapterId, DisplaySettings current)
         {
-            var name = AdapterNames[adapterId];
-            if (!current.AdapterNames.ContainsValue(name))
+            var name = Adapters[adapterId].Name;
+            if (current.Adapters.All(x => x.Value.Name != name))
             {
                 MissingAdapters.Add(name);
                 return adapterId;
             }
-            return current.AdapterNames.Where(x => x.Value == name).Select(x => x.Key).First();
+            return current.Adapters.Where(x => x.Value.Name == name).Select(x => x.Key).First();
         }
 
         public DisplaySettings UpdateAdapterIds()
@@ -103,6 +121,40 @@ namespace DisplayProfiles
             }
 
             return this;
+        }
+
+        public sealed class AdapterData
+        {
+            public AdapterData(string name)
+            {
+                Name = name;
+            }
+
+            public string Name { get; }
+            public Dictionary<uint, SourceData> Sources { get; } = new Dictionary<uint, SourceData>();
+            public Dictionary<uint, TargetData> Targets { get; } = new Dictionary<uint, TargetData>();
+        }
+
+        public sealed class SourceData
+        {
+            public SourceData(string name)
+            {
+                Name = name;
+            }
+
+            public string Name { get; }
+        }
+
+        public sealed class TargetData
+        {
+            public TargetData(string friendlyName, string name)
+            {
+                FriendlyName = friendlyName;
+                Name = name;
+            }
+
+            public string FriendlyName { get; }
+            public string Name { get; }
         }
     }
 }
