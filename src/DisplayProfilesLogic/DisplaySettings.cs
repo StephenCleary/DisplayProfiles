@@ -87,6 +87,9 @@ namespace DisplayProfiles
 
         private static string TryGetDeviceFriendlyName(string devicePath)
         {
+            if (devicePath == "")
+                return "";
+
             try
             {
                 return NativeMethods.GetDeviceFriendlyName(devicePath);
