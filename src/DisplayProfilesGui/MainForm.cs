@@ -6,7 +6,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using DisplayProfiles;
 using DisplayProfilesGui.Hotkeys;
@@ -18,6 +22,7 @@ namespace DisplayProfilesGui
     {
         private readonly SortedDictionary<string, DisplaySettings> _profiles = new SortedDictionary<string, DisplaySettings>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
+        private readonly Subject<Unit> _rebuild = new Subject<Unit>();
 
         public MainForm()
         {
@@ -25,6 +30,9 @@ namespace DisplayProfilesGui
             notifyIcon.Icon = Resources.MainIcon;
             Rebuild();
             DeviceChangeNotification.NativeMethods.RegisterForDeviceNotification(Handle);
+            _rebuild.Throttle(TimeSpan.FromSeconds(0.5))
+                .ObserveOn(SynchronizationContext.Current)
+                .Subscribe(_ => Rebuild());
         }
 
         protected override void WndProc(ref Message m)
@@ -35,7 +43,7 @@ namespace DisplayProfilesGui
                 return;
             if (m.WParam != DeviceChangeNotification.NativeMethods.DBT_DEVNODES_CHANGED)
                 return;
-            Debug.WriteLine("Saw msg.");
+            _rebuild.OnNext(Unit.Default);
         }
 
         private void Rebuild()
@@ -232,7 +240,7 @@ namespace DisplayProfilesGui
             }
             finally
             {
-                Rebuild();
+                _rebuild.OnNext(Unit.Default);
             }
         }
 
