@@ -56,6 +56,7 @@
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ApplicationSettings.cs" />
+    <Compile Include="DeviceChangeNotification\NativeMethods.cs" />
     <Compile Include="HotkeySetting.cs" />
     <Compile Include="Hotkeys\ApplicationHotkeyManager.cs" />
     <Compile Include="Hotkeys\Hotkey.cs" />
@@ -147,9 +148,7 @@
       <Name>DisplayProfilesLogic</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DeviceChangeNotification\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

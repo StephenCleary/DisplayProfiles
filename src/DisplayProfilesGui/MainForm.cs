@@ -24,6 +24,16 @@ namespace DisplayProfilesGui
             notifyIcon.Icon = Resources.MainIcon;
             BuildTrayMenu();
             RefreshHotkeys();
+            DeviceChangeNotification.NativeMethods.RegisterForDeviceNotification(Handle);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == DeviceChangeNotification.NativeMethods.WM_DEVICECHANGE)
+            {
+                Debug.WriteLine("Saw msg.");
+            }
         }
 
         private void RefreshHotkeys()

@@ -58,6 +58,7 @@
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Name = "MainForm";
             this.Text = "DisplayProfiles";
+            this.TopMost = true;
             this.ResumeLayout(false);
 
         }
