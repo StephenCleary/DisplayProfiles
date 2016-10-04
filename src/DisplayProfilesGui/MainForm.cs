@@ -16,14 +16,14 @@ namespace DisplayProfilesGui
 {
     public partial class MainForm : Form
     {
+        private readonly SortedDictionary<string, DisplaySettings> _profiles = new SortedDictionary<string, DisplaySettings>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
 
         public MainForm()
         {
             InitializeComponent();
             notifyIcon.Icon = Resources.MainIcon;
-            BuildTrayMenu();
-            RefreshHotkeys();
+            Rebuild();
             DeviceChangeNotification.NativeMethods.RegisterForDeviceNotification(Handle);
         }
 
@@ -34,6 +34,27 @@ namespace DisplayProfilesGui
             {
                 Debug.WriteLine("Saw msg.");
             }
+        }
+
+        private void Rebuild()
+        {
+            // Load all profile files
+            _profiles.Clear();
+            var profiles = SettingsFiles.GetProfileNames();
+            foreach (var name in profiles)
+            {
+                try
+                {
+                    _profiles.Add(name, Profile.LoadDisplaySettings(SettingsFiles.ProfileNameToFileName(name)));
+                }
+                catch (Exception ex)
+                {
+                    HandleError(ex, "Could not read profile " + name);
+                }
+            }
+
+            BuildTrayMenu();
+            RefreshHotkeys();
         }
 
         private void RefreshHotkeys()
@@ -62,22 +83,29 @@ namespace DisplayProfilesGui
         {
             contextMenuStrip.Items.Clear();
 
-            // Find all profile files
-            var profiles = SettingsFiles.GetProfileNames();
-
             // Add to load menu
-            foreach (var profile in profiles)
-                contextMenuStrip.Items.Add(new ToolStripMenuItem(profile, Resources.Profile.ToBitmap(), (_, __) => LoadProfile(profile)));
+            foreach (var profile in _profiles)
+            {
+                var item = new ToolStripMenuItem(profile.Key, Resources.Profile.ToBitmap(), (_, __) => LoadProfile(profile.Key));
+                var ex = profile.Value.Validate();
+                if (ex != null)
+                {
+                    item.Image = Resources.Warning.ToBitmap();
+                    item.ToolTipText = AugmentException(ex, profile.Value).Message;
+                }
+                contextMenuStrip.Items.Add(item);
+            }
 
             // Menu for saving items
             var newProfileMenuItem = new ToolStripMenuItem("New Profile...", Resources.NewProfile.ToBitmap(), OnMenuSaveAs);
-            if (profiles.Count != 0)
+            if (_profiles.Count != 0)
             {
                 contextMenuStrip.Items.Add(new ToolStripSeparator());
                 var saveMenu = new ToolStripMenuItem("Save Profile", Resources.SaveProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
                 saveMenu.DropDownItems.Add(newProfileMenuItem);
                 saveMenu.DropDownItems.Add(new ToolStripSeparator());
-                profiles.ForEach(x => saveMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.SaveProfile.ToBitmap(), (_, __) => SaveProfile(x))));
+                foreach (var profile in _profiles.Keys)
+                    saveMenu.DropDownItems.Add(new ToolStripMenuItem(profile, Resources.SaveProfile.ToBitmap(), (_, __) => SaveProfile(profile)));
                 contextMenuStrip.Items.Add(saveMenu);
             }
             else
@@ -86,35 +114,32 @@ namespace DisplayProfilesGui
             }
 
             // Menu for deleting items
-            if (profiles.Count != 0)
+            if (_profiles.Count != 0)
             {
                 var deleteMenu = new ToolStripMenuItem("Delete Profile", Resources.DeleteProfile.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
-                profiles.ForEach(x => deleteMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.DeleteProfile.ToBitmap(), (_, __) => DeleteProfile(x))));
+                foreach (var profile in _profiles.Keys)
+                    deleteMenu.DropDownItems.Add(new ToolStripMenuItem(profile, Resources.DeleteProfile.ToBitmap(), (_, __) => DeleteProfile(profile)));
                 contextMenuStrip.Items.Add(deleteMenu);
             }
 
             // Menu for hotkeys
-            if (profiles.Count != 0)
+            if (_profiles.Count != 0)
             {
                 var hotkeyMenu = new ToolStripMenuItem("Hotkeys", Resources.Hotkey.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
-                profiles.ForEach(x =>
+                foreach (var profile in _profiles.Keys)
                 {
-                    var hotkey = SettingsFiles.ApplicationSettings.FindHotkeyForProfileName(x);
-                    hotkeyMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.Profile.ToBitmap(), (_, __) => SetHotkey(x))
+                    var hotkey = SettingsFiles.ApplicationSettings.FindHotkeyForProfileName(profile);
+                    hotkeyMenu.DropDownItems.Add(new ToolStripMenuItem(profile, Resources.Profile.ToBitmap(), (_, __) => SetHotkey(profile))
                     {
                         ShortcutKeys = hotkey,
                         ShowShortcutKeys = hotkey != Keys.None,
                     });
-                });
+                }
                 contextMenuStrip.Items.Add(hotkeyMenu);
             }
 
             contextMenuStrip.Items.Add(new ToolStripSeparator());
-            contextMenuStrip.Items.Add(new ToolStripMenuItem("About", Resources.About.ToBitmap(), (_, __) =>
-            {
-                using (var dialog = new AboutDialog())
-                    dialog.ShowDialog();
-            }));
+            contextMenuStrip.Items.Add(new ToolStripMenuItem("About", Resources.About.ToBitmap(), OnAbout));
             contextMenuStrip.Items.Add(new ToolStripMenuItem("Exit", Resources.Exit.ToBitmap(), (_, __) => Application.Exit()));
         }
 
@@ -127,6 +152,13 @@ namespace DisplayProfilesGui
                     return;
                 SaveProfile(dialog.ProfileName);
             }
+        }
+
+        private void OnAbout(object sender, EventArgs e)
+        {
+            using (var dialog = new AboutDialog())
+                dialog.ShowDialog();
+            Rebuild();
         }
 
         private void SetHotkey(string name)
@@ -145,18 +177,23 @@ namespace DisplayProfilesGui
         {
             ExecuteUiAction(() =>
             {
-                var profile = Profile.LoadDisplaySettings(SettingsFiles.ProfileNameToFileName(name));
+                var profile = _profiles[name];
                 try
                 {
                     profile.SetCurrent();
                 }
                 catch (Exception ex)
                 {
-                    if (profile.MissingAdapters.Count == 0)
-                        throw;
-                    throw new Exception(ex.Message + "\nThese adapters are missing:\n" + string.Join("\n", profile.MissingAdapters), ex);
+                    throw AugmentException(ex, profile);
                 }
             }, "Could not load display profile " + name);
+        }
+
+        private static Exception AugmentException(Exception ex, DisplaySettings profile)
+        {
+            if (profile.MissingAdapters.Count == 0)
+                return ex;
+            return new Exception(ex.Message + "\nThese adapters are missing:\n" + string.Join("\n", profile.MissingAdapters), ex);
         }
 
         private void SaveProfile(string name)
@@ -182,16 +219,20 @@ namespace DisplayProfilesGui
             }
             catch (Exception ex)
             {
-                notifyIcon.BalloonTipTitle = errorMessage;
-                notifyIcon.BalloonTipText = ex.Message;
-                notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
-                notifyIcon.ShowBalloonTip(5000);
+                HandleError(ex, errorMessage);
             }
             finally
             {
-                BuildTrayMenu();
-                RefreshHotkeys();
+                Rebuild();
             }
+        }
+
+        private void HandleError(Exception ex, string message)
+        {
+            notifyIcon.BalloonTipTitle = message;
+            notifyIcon.BalloonTipText = ex.Message;
+            notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
+            notifyIcon.ShowBalloonTip(5000);
         }
     }
 }

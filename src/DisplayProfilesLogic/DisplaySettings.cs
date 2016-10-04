@@ -35,12 +35,24 @@ namespace DisplayProfiles
         public Dictionary<long, string> AdapterNames { get; }
 
         [JsonIgnore]
-        public List<string> MissingAdapters { get; } = new List<string>();
+        public HashSet<string> MissingAdapters { get; } = new HashSet<string> ();
 
         public void SetCurrent()
         {
-            NativeMethods.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), NativeMethods.SdcFlags.Validate | NativeMethods.SdcFlags.UseSuppliedDisplayConfig | NativeMethods.SdcFlags.AllowChanges);
             NativeMethods.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), NativeMethods.SdcFlags.Apply | NativeMethods.SdcFlags.UseSuppliedDisplayConfig | NativeMethods.SdcFlags.AllowChanges | NativeMethods.SdcFlags.SaveToDatabase);
+        }
+
+        public Exception Validate()
+        {
+            try
+            {
+                NativeMethods.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), NativeMethods.SdcFlags.Validate | NativeMethods.SdcFlags.UseSuppliedDisplayConfig | NativeMethods.SdcFlags.AllowChanges);
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+            return null;
         }
 
         public static DisplaySettings GetCurrent(bool activeOnly)
