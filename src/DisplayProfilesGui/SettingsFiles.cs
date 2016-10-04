@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DisplayProfiles;
 using Newtonsoft.Json;
 
 namespace DisplayProfilesGui
@@ -28,7 +29,7 @@ namespace DisplayProfilesGui
                 Directory.CreateDirectory(SettingsProfilesDirectory);
             try
             {
-                ApplicationSettings = JsonConvert.DeserializeObject<ApplicationSettings>(File.ReadAllText(ApplicationSettingsFilename));
+                ApplicationSettings = JsonConvert.DeserializeObject<ApplicationSettings>(File.ReadAllText(ApplicationSettingsFilename), Profile.JsonSerializerSettings);
             }
             catch
             {
@@ -55,7 +56,7 @@ namespace DisplayProfilesGui
 
         public static void SaveApplicationSettings()
         {
-            File.WriteAllText(ApplicationSettingsFilename, JsonConvert.SerializeObject(ApplicationSettings));
+            File.WriteAllText(ApplicationSettingsFilename, JsonConvert.SerializeObject(ApplicationSettings, Profile.JsonSerializerSettings));
         }
     }
 }
