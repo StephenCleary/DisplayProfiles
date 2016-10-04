@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
@@ -259,7 +261,7 @@ namespace DisplayProfiles.Interop
             IntPtr z
         );
 
-        public static Tuple<DisplayConfigPathInfo[], DisplayConfigModeInfo[]> GetDisplayConfig(QueryDisplayFlags flags)
+        public static Tuple<List<DisplayConfigPathInfo>, List<DisplayConfigModeInfo>> GetDisplayConfig(QueryDisplayFlags flags)
         {
             while (true)
             {
@@ -275,7 +277,7 @@ namespace DisplayProfiles.Interop
                     continue;
                 if (err != NO_ERROR)
                     throw Marshal.GetExceptionForHR(Win32ErrorToHResult(err));
-                return Tuple.Create(pathArray, modeArray);
+                return Tuple.Create(pathArray.Take((int)numPathArrayElements).ToList(), modeArray.Take((int)numModeInfoArrayElements).ToList());
             }
         }
 

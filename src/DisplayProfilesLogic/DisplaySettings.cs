@@ -65,9 +65,6 @@ namespace DisplayProfiles
             var names = new Dictionary<long, AdapterData>();
             foreach (var adapterId in paths.Select(x => x.sourceInfo.adapterId).Concat(paths.Select(x => x.targetInfo.adapterId)).Concat(modes.Select(x => x.adapterId)).Distinct())
             {
-                // Sometimes we see invalid adapterId's of 0 when switching.
-                if (adapterId == 0)
-                    continue;
                 var data = new AdapterData(NativeMethods.GetAdapterName(adapterId));
                 foreach (var sourceId in paths.Where(x => x.sourceInfo.adapterId == adapterId).Select(x => x.sourceInfo.id)
                     .Concat(modes.Where(x => x.adapterId == adapterId && x.infoType == NativeMethods.DisplayConfigModeInfoType.Source).Select(x => x.id)).Distinct())
@@ -94,9 +91,8 @@ namespace DisplayProfiles
             {
                 return NativeMethods.GetDeviceFriendlyName(devicePath);
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine(ex);
                 return "";
             }
         }
