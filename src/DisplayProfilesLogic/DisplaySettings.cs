@@ -16,26 +16,24 @@ namespace DisplayProfiles
 {
     public sealed class DisplaySettings
     {
-        public DisplaySettings()
+        [JsonConstructor]
+        private DisplaySettings()
         {
-            PathInfo = new List<NativeMethods.DisplayConfigPathInfo>();
-            ModeInfo = new List<NativeMethods.DisplayConfigModeInfo>();
-            Adapters = new Dictionary<long, AdapterData>();
         }
 
-        public DisplaySettings(IEnumerable<NativeMethods.DisplayConfigPathInfo> pathInfo, IEnumerable<NativeMethods.DisplayConfigModeInfo> modeInfo, Dictionary<long, AdapterData> adapterData)
+        private DisplaySettings(IEnumerable<NativeMethods.DisplayConfigPathInfo> pathInfo, IEnumerable<NativeMethods.DisplayConfigModeInfo> modeInfo, Dictionary<long, AdapterData> adapterData)
         {
             PathInfo = pathInfo.ToList();
             ModeInfo = modeInfo.ToList();
             Adapters = adapterData;
         }
 
-        public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; }
-        public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; }
-        public Dictionary<long, AdapterData> Adapters { get; }
+        public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; } = new List<NativeMethods.DisplayConfigPathInfo>();
+        public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; } = new List<NativeMethods.DisplayConfigModeInfo>();
+        public Dictionary<long, AdapterData> Adapters { get; } = new Dictionary<long, AdapterData>();
 
         [JsonIgnore]
-        public HashSet<string> MissingAdapters { get; } = new HashSet<string> ();
+        public HashSet<string> MissingAdapters { get; } = new HashSet<string>();
 
         public void SetCurrent()
         {
@@ -87,12 +85,25 @@ namespace DisplayProfiles
             return new DisplaySettings(arrays.Item1, arrays.Item2, names);
         }
 
+        private static string TryGetDeviceFriendlyName(string devicePath)
+        {
+            try
+            {
+                return NativeMethods.GetDeviceFriendlyName(devicePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return "";
+            }
+        }
+
         private long UpdateAdapterId(long adapterId, DisplaySettings current)
         {
             var name = Adapters[adapterId].Name;
             if (current.Adapters.All(x => x.Value.Name != name))
             {
-                MissingAdapters.Add(name);
+                MissingAdapters.Add(Adapters[adapterId].ToString());
                 return adapterId;
             }
             return current.Adapters.Where(x => x.Value.Name == name).Select(x => x.Key).First();
@@ -125,36 +136,80 @@ namespace DisplayProfiles
 
         public sealed class AdapterData
         {
+            [JsonConstructor]
+            private AdapterData()
+            {
+            }
+
             public AdapterData(string name)
             {
                 Name = name;
+                DeviceFriendlyName = TryGetDeviceFriendlyName(name);
             }
 
             public string Name { get; }
+            public string DeviceFriendlyName { get; }
             public Dictionary<uint, SourceData> Sources { get; } = new Dictionary<uint, SourceData>();
             public Dictionary<uint, TargetData> Targets { get; } = new Dictionary<uint, TargetData>();
+
+            public override string ToString()
+            {
+                if (!string.IsNullOrEmpty(DeviceFriendlyName))
+                    return DeviceFriendlyName;
+                return Name;
+            }
         }
 
         public sealed class SourceData
         {
+            [JsonConstructor]
+            private SourceData()
+            {
+            }
+
             public SourceData(string name)
             {
                 Name = name;
+                DeviceFriendlyName = TryGetDeviceFriendlyName(name);
             }
 
             public string Name { get; }
+            public string DeviceFriendlyName { get; }
+
+            public override string ToString()
+            {
+                if (!string.IsNullOrEmpty(DeviceFriendlyName))
+                    return DeviceFriendlyName;
+                return Name;
+            }
         }
 
         public sealed class TargetData
         {
+            [JsonConstructor]
+            private TargetData()
+            {
+            }
+
             public TargetData(string friendlyName, string name)
             {
                 FriendlyName = friendlyName;
                 Name = name;
+                DeviceFriendlyName = TryGetDeviceFriendlyName(name);
             }
 
             public string FriendlyName { get; }
             public string Name { get; }
+            public string DeviceFriendlyName { get; }
+
+            public override string ToString()
+            {
+                if (!string.IsNullOrEmpty(FriendlyName))
+                    return FriendlyName;
+                if (!string.IsNullOrEmpty(DeviceFriendlyName))
+                    return DeviceFriendlyName;
+                return Name;
+            }
         }
     }
 }

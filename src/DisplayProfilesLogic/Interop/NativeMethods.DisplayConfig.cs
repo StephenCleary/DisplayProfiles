@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace DisplayProfiles.Interop
 {
-    public class NativeMethods
+    public partial class NativeMethods
     {
         public const uint DISPLAYCONFIG_PATH_ACTIVE = 0x1;
 
