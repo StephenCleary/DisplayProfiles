@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using DisplayProfiles.Interop;
 using Newtonsoft.Json;
@@ -10,11 +11,10 @@ namespace DisplayProfiles
     {
         private static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings { ContractResolver = DisplayConfigModeInfoContractResolver.Instance };
 
-        public static void LoadDisplaySettingsAndSetAsCurrent(string filename)
+        public static DisplaySettings LoadDisplaySettings(string filename)
         {
-            JsonConvert.DeserializeObject<DisplaySettings>(File.ReadAllText(filename), JsonSerializerSettings)
-                .UpdateAdapterIds()
-                .SetCurrent();
+            return JsonConvert.DeserializeObject<DisplaySettings>(File.ReadAllText(filename), JsonSerializerSettings)
+                .UpdateAdapterIds();
         }
 
         public static void SaveCurrentDisplaySettings(string filename)
@@ -30,22 +30,22 @@ namespace DisplayProfiles
             {
                 var property = base.CreateProperty(member, memberSerialization);
 
-                if (property.DeclaringType == typeof(Ccd.DisplayConfigModeInfo))
+                if (property.DeclaringType == typeof(NativeMethods.DisplayConfigModeInfo))
                 {
                     if (property.PropertyName == "targetMode")
                     {
                         property.ShouldSerialize = obj =>
                         {
-                            var instance = (Ccd.DisplayConfigModeInfo)obj;
-                            return instance.infoType == Ccd.DisplayConfigModeInfoType.Target;
+                            var instance = (NativeMethods.DisplayConfigModeInfo)obj;
+                            return instance.infoType == NativeMethods.DisplayConfigModeInfoType.Target;
                         };
                     }
                     else if (property.PropertyName == "sourceMode")
                     {
                         property.ShouldSerialize = obj =>
                         {
-                            var instance = (Ccd.DisplayConfigModeInfo)obj;
-                            return instance.infoType == Ccd.DisplayConfigModeInfoType.Source;
+                            var instance = (NativeMethods.DisplayConfigModeInfo)obj;
+                            return instance.infoType == NativeMethods.DisplayConfigModeInfoType.Source;
                         };
                     }
                 }

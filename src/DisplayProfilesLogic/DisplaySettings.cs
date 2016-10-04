@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using DisplayProfiles.Interop;
+
+// Relationship of Mode Information to Path Information:
+//  https://msdn.microsoft.com/en-us/library/windows/hardware/ff569241(v=vs.85).aspx (http://www.webcitation.org/6kzhHphCU)
+// http://stackoverflow.com/questions/22399622/windows-multi-monitor-how-can-i-determine-if-a-target-is-physically-connected-t (http://www.webcitation.org/6kzhS0qnv)
+// Video Present Network Terminology:
+//  https://msdn.microsoft.com/en-us/library/windows/hardware/ff570543(v=vs.85).aspx (http://www.webcitation.org/6kzhdNyRf)
 
 namespace DisplayProfiles
 {
@@ -10,72 +17,74 @@ namespace DisplayProfiles
     {
         public DisplaySettings()
         {
-            PathInfo = new List<Ccd.DisplayConfigPathInfo>();
-            ModeInfo = new List<Ccd.DisplayConfigModeInfo>();
+            PathInfo = new List<NativeMethods.DisplayConfigPathInfo>();
+            ModeInfo = new List<NativeMethods.DisplayConfigModeInfo>();
+            AdapterNames = new Dictionary<long, string>();
         }
 
-        public DisplaySettings(IEnumerable<Ccd.DisplayConfigPathInfo> pathInfo, IEnumerable<Ccd.DisplayConfigModeInfo> modeInfo)
+        public DisplaySettings(IEnumerable<NativeMethods.DisplayConfigPathInfo> pathInfo, IEnumerable<NativeMethods.DisplayConfigModeInfo> modeInfo, Dictionary<long, string> adapterNames)
         {
             PathInfo = pathInfo.ToList();
             ModeInfo = modeInfo.ToList();
+            AdapterNames = adapterNames;
         }
 
-        public List<Ccd.DisplayConfigPathInfo> PathInfo { get; }
-        public List<Ccd.DisplayConfigModeInfo> ModeInfo { get; }
+        public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; }
+        public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; }
+        public Dictionary<long, string> AdapterNames { get; }
+        public List<string> MissingAdapters { get; } = new List<string>();
 
         public void SetCurrent()
         {
-            var flags = Ccd.SdcFlags.Apply | Ccd.SdcFlags.UseSuppliedDisplayConfig | Ccd.SdcFlags.SaveToDatabase | Ccd.SdcFlags.AllowChanges;
-            Ccd.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), flags);
+            NativeMethods.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), NativeMethods.SdcFlags.Validate | NativeMethods.SdcFlags.UseSuppliedDisplayConfig | NativeMethods.SdcFlags.AllowChanges);
+            NativeMethods.SetDisplayConfig(PathInfo.ToArray(), ModeInfo.ToArray(), NativeMethods.SdcFlags.Apply | NativeMethods.SdcFlags.UseSuppliedDisplayConfig | NativeMethods.SdcFlags.AllowChanges | NativeMethods.SdcFlags.SaveToDatabase);
         }
 
         public static DisplaySettings GetCurrent(bool activeOnly)
         {
             var flags = activeOnly ?
-                Ccd.QueryDisplayFlags.OnlyActivePaths :
-                Ccd.QueryDisplayFlags.AllPaths;
+                NativeMethods.QueryDisplayFlags.OnlyActivePaths :
+                NativeMethods.QueryDisplayFlags.AllPaths;
 
-            var arrays = Ccd.GetDisplayConfig(flags);
-            return new DisplaySettings(arrays.Item1, arrays.Item2);
+            var arrays = NativeMethods.GetDisplayConfig(flags);
+            var names = new Dictionary<long, string>();
+            foreach (var adapterId in arrays.Item1.Select(x => x.sourceInfo.adapterId).Concat(arrays.Item1.Select(x => x.targetInfo.adapterId)).Concat(arrays.Item2.Select(x => x.adapterId)))
+                if (!names.ContainsKey(adapterId) && adapterId != 0) // Sometimes we see invalid adapterId's of 0 when switching.
+                    names.Add(adapterId, NativeMethods.GetAdapterName(adapterId));
+            return new DisplaySettings(arrays.Item1, arrays.Item2, names);
+        }
+
+        private long UpdateAdapterId(long adapterId, DisplaySettings current)
+        {
+            var name = AdapterNames[adapterId];
+            if (!current.AdapterNames.ContainsValue(name))
+            {
+                MissingAdapters.Add(name);
+                return adapterId;
+            }
+            return current.AdapterNames.Where(x => x.Value == name).Select(x => x.Key).First();
         }
 
         public DisplaySettings UpdateAdapterIds()
         {
-            // For some reason the adapterID parameter changes upon system restart, all other parameters however, especially the ID remain constant.
-            // We check the loaded settings against the current settings replacing the adapaterID with the other parameters
-
+            // The adapterId's sometimes change after a system restart.
+            // Make a best-effort to update the adapterId's with what's currently in the system.
+            MissingAdapters.Clear();
             var current = GetCurrent(activeOnly: false);
+
             for (var i = 0; i != PathInfo.Count; ++i)
             {
                 var path = PathInfo[i];
-                var j = current.PathInfo.FindIndex(x => x.sourceInfo.id == path.sourceInfo.id && x.targetInfo.id == path.targetInfo.id);
-                if (j == -1)
-                    continue;
-                path.sourceInfo.adapterId = current.PathInfo[j].sourceInfo.adapterId;
-                path.targetInfo.adapterId = current.PathInfo[j].targetInfo.adapterId;
+                path.sourceInfo.adapterId = UpdateAdapterId(path.sourceInfo.adapterId, current);
+                path.targetInfo.adapterId = UpdateAdapterId(path.targetInfo.adapterId, current);
                 PathInfo[i] = path;
             }
 
-            // Same again for modeInfo, however we get the required adapterId information from the pathInfoArray
             for (var i = 0; i != ModeInfo.Count; ++i)
             {
-                var targetMode = ModeInfo[i];
-                var j = PathInfo.FindIndex(x => x.targetInfo.id == targetMode.id && targetMode.infoType == Ccd.DisplayConfigModeInfoType.Target);
-                if (j == -1)
-                    continue;
-                var path = PathInfo[j];
-
-                // We found target adapter id, now lets look for the source modeInfo and adapterID
-                var k = ModeInfo.FindIndex(x => x.id == path.sourceInfo.id && x.adapterId == targetMode.adapterId && x.infoType == Ccd.DisplayConfigModeInfoType.Source);
-                if (k != -1)
-                {
-                    var sourceMode = ModeInfo[k];
-                    sourceMode.adapterId = path.sourceInfo.adapterId;
-                    ModeInfo[k] = sourceMode;
-                }
-
-                targetMode.adapterId = path.targetInfo.adapterId;
-                ModeInfo[i] = targetMode;
+                var mode = ModeInfo[i];
+                mode.adapterId = UpdateAdapterId(mode.adapterId, current);
+                ModeInfo[i] = mode;
             }
 
             return this;

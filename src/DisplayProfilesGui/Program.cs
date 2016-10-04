@@ -15,8 +15,9 @@ namespace DisplayProfilesGui
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            var mainForm = new MainForm();
-            Application.Run();
+            SettingsFiles.EnsureCreated();
+            using (new MainForm())
+                Application.Run();
         }
     }
 }

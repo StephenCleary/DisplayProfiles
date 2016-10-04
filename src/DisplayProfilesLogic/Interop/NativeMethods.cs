@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace DisplayProfiles.Interop
 {
-    public class Ccd
+    public class NativeMethods
     {
         private const int NO_ERROR = 0;
         private const int ERROR_INSUFICCIENT_BUFFER = 122;
@@ -144,6 +144,31 @@ namespace DisplayProfiles.Interop
             public uint statusFlags;
         }
 
+        private enum DisplayConfigDeviceInfoType: uint
+        {
+            GetAdapterName = 4,
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Pack = 4)]
+        public struct DisplayConfigAdapterName
+        {
+            public DisplayConfigAdapterName(long adapterId)
+                : this()
+            {
+                type = (uint)DisplayConfigDeviceInfoType.GetAdapterName;
+                size = (uint)Marshal.SizeOf(typeof(DisplayConfigAdapterName));
+                this.adapterId = adapterId;
+            }
+
+            public uint type;
+            public uint size;
+            public long adapterId;
+            public uint id;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string adapterDevicePath;
+        }
+
         [Flags]
         public enum QueryDisplayFlags : uint
         {
@@ -188,7 +213,7 @@ namespace DisplayProfiles.Interop
                 uint numPathArrayElements, numModeInfoArrayElements;
                 var err = GetDisplayConfigBufferSizes(flags, out numPathArrayElements, out numModeInfoArrayElements);
                 if (err != NO_ERROR)
-                    throw new Win32Exception(err);
+                   throw Marshal.GetExceptionForHR(Win32ErrorToHResult(err));
 
                 var pathArray = new DisplayConfigPathInfo[numPathArrayElements];
                 var modeArray = new DisplayConfigModeInfo[numModeInfoArrayElements];
@@ -196,9 +221,31 @@ namespace DisplayProfiles.Interop
                 if (err == ERROR_INSUFICCIENT_BUFFER)
                     continue;
                 if (err != NO_ERROR)
-                    throw new Win32Exception(err);
+                    throw Marshal.GetExceptionForHR(Win32ErrorToHResult(err));
                 return Tuple.Create(pathArray, modeArray);
             }
+        }
+
+        [DllImport("User32.dll")]
+        private static extern int DisplayConfigGetDeviceInfo(ref DisplayConfigAdapterName info);
+
+        public static string GetAdapterName(long adapterId)
+        {
+            // TODO: handle "insufficient buffer" in a reasonable way
+            var info = new DisplayConfigAdapterName(adapterId);
+            var err = DisplayConfigGetDeviceInfo(ref info);
+            if (err != NO_ERROR)
+                throw Marshal.GetExceptionForHR(Win32ErrorToHResult(err));
+            return info.adapterDevicePath;
+        }
+
+        private static int Win32ErrorToHResult(int win32Error)
+        {
+            if (win32Error == 0)
+                return 0;
+            var err = unchecked((uint) win32Error);
+            var result = (err & 0x0000FFFF) | 0x80070000;
+            return unchecked((int) result);
         }
     }
 }

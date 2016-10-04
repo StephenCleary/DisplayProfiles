@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisplaySettings.cs" />
-    <Compile Include="Interop\Ccd.cs" />
+    <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Profile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

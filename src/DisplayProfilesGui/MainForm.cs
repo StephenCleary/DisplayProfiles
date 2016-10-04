@@ -2,42 +2,50 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DisplayProfiles;
+using DisplayProfilesGui.Hotkeys;
 using DisplayProfilesGui.Properties;
 
 namespace DisplayProfilesGui
 {
     public partial class MainForm : Form
     {
-        private readonly string SettingsProfilesDirectory;
+        private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
 
         public MainForm()
         {
-            var settingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DisplayProfiles");
-            SettingsProfilesDirectory = Path.Combine(settingsDirectory, "Profiles");
-            if (!Directory.Exists(settingsDirectory))
-                Directory.CreateDirectory(settingsDirectory);
-            if (!Directory.Exists(SettingsProfilesDirectory))
-                Directory.CreateDirectory(SettingsProfilesDirectory);
-
             InitializeComponent();
             notifyIcon.Icon = Resources.MainIcon;
             BuildTrayMenu();
+            RefreshHotkeys();
         }
 
-        private string ProfileNameToFileName(string profileName)
+        private void RefreshHotkeys()
         {
-            return Path.Combine(SettingsProfilesDirectory, profileName + ".json");
-        }
-
-        private string FileNameToProfileName(string fileName)
-        {
-            return Path.GetFileNameWithoutExtension(fileName);
+            foreach (var hotkey in _hotkeys)
+                hotkey.Dispose();
+            _hotkeys.Clear();
+            foreach (var profileHotkey in SettingsFiles.ApplicationSettings.Hotkeys)
+            {
+                var name = profileHotkey.ProfileName;
+                try
+                {
+                    _hotkeys.Add(new WinFormsHotkey(profileHotkey.Hotkey, true, () => LoadProfile(name)));
+                }
+                catch (Exception ex)
+                {
+                    notifyIcon.BalloonTipTitle = "Could not bind hotkey " + WinFormsHotkey.HotkeyString(profileHotkey.Hotkey) + " to " + name;
+                    notifyIcon.BalloonTipText = ex.Message;
+                    notifyIcon.BalloonTipIcon = ToolTipIcon.Warning;
+                    notifyIcon.ShowBalloonTip(5000);
+                }
+            }
         }
 
         private void BuildTrayMenu()
@@ -45,7 +53,7 @@ namespace DisplayProfilesGui
             contextMenuStrip.Items.Clear();
 
             // Find all profile files
-            var profiles = Directory.GetFiles(SettingsProfilesDirectory, "*.json").Select(FileNameToProfileName).ToList();
+            var profiles = SettingsFiles.GetProfileNames();
 
             // Add to load menu
             foreach (var profile in profiles)
@@ -75,35 +83,21 @@ namespace DisplayProfilesGui
                 contextMenuStrip.Items.Add(deleteMenu);
             }
 
-            //// Menu for hotkeys
-            //ToolStripMenuItem hotkeyMenu = new ToolStripMenuItem("Set Hotkeys");
-            //hotkeyMenu.ImageIndex = 7;
-            //hotkeyMenu.DropDown = new ToolStripDropDownMenu();
-            //hotkeyMenu.DropDown.ImageList = trayMenu.ImageList;
-            //trayMenu.Items.Add(hotkeyMenu);
-
-            // Profile-specific sub-menu items
-            foreach (var profile in profiles)
+            // Menu for hotkeys
+            if (profiles.Count != 0)
             {
-
-                //string hotkeyString = "(No Hotkey)";
-                //// check if a hotkey is assigned
-                //Hotkey hotkey = FindHotkey(Path.GetFileNameWithoutExtension(profile));
-                //if (hotkey != null)
-                //{
-                //    hotkeyString = "(" + hotkey.ToString() + ")";
-                //}
-
-                //newMenuItem = hotkeyMenu.DropDownItems.Add(itemCaption + " " + hotkeyString);
-                //newMenuItem.Tag = itemCaption;
-                //newMenuItem.Click += OnHotkeySet;
-                //newMenuItem.ImageIndex = 3;
+                var hotkeyMenu = new ToolStripMenuItem("Hotkeys", Resources.Hotkey.ToBitmap()) { DropDown = new ToolStripDropDownMenu() };
+                profiles.ForEach(x =>
+                {
+                    var hotkey = SettingsFiles.ApplicationSettings.FindHotkeyForProfileName(x);
+                    hotkeyMenu.DropDownItems.Add(new ToolStripMenuItem(x, Resources.Profile.ToBitmap(), (_, __) => SetHotkey(x))
+                    {
+                        ShortcutKeys = hotkey,
+                        ShowShortcutKeys = hotkey != Keys.None,
+                    });
+                });
+                contextMenuStrip.Items.Add(hotkeyMenu);
             }
-
-            //trayMenu.Items.Add("-");
-            //newMenuItem = trayMenu.Items.Add("Turn Off All Monitors");
-            //newMenuItem.Click += OnEnergySaving;
-            //newMenuItem.ImageIndex = 0;
 
             contextMenuStrip.Items.Add(new ToolStripSeparator());
             contextMenuStrip.Items.Add(new ToolStripMenuItem("About", Resources.About.ToBitmap(), (_, __) =>
@@ -125,60 +119,69 @@ namespace DisplayProfilesGui
             }
         }
 
+        private void SetHotkey(string name)
+        {
+            ExecuteUiAction(() =>
+            {
+                var result = SetHotkeyDialog.ExecuteDialog(name, SettingsFiles.ApplicationSettings.FindHotkeyForProfileName(name));
+                if (result == null)
+                    return;
+                SettingsFiles.ApplicationSettings.SetHotkeyForProfileName(name, result.Value);
+                SettingsFiles.SaveApplicationSettings();
+            }, "Could not set hotkey for profile " + name);
+        }
+
         private void LoadProfile(string name)
         {
-            try
+            ExecuteUiAction(() =>
             {
-                Profile.LoadDisplaySettingsAndSetAsCurrent(ProfileNameToFileName(name));
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex, "Could not load display profile " + name);
-            }
-            finally
-            {
-                BuildTrayMenu();
-            }
+                var profile = Profile.LoadDisplaySettings(SettingsFiles.ProfileNameToFileName(name));
+                try
+                {
+                    profile.SetCurrent();
+                }
+                catch (Exception ex)
+                {
+                    if (profile.MissingAdapters.Count == 0)
+                        throw;
+                    throw new Exception(ex.Message + "\nThese adapters are missing:\n" + string.Join("\n", profile.MissingAdapters), ex);
+                }
+            }, "Could not load display profile " + name);
         }
 
         private void SaveProfile(string name)
         {
-            try
-            {
-                Profile.SaveCurrentDisplaySettings(ProfileNameToFileName(name));
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex, "Could not save display profile " + name);
-            }
-            finally
-            {
-                BuildTrayMenu();
-            }
+            ExecuteUiAction(() => Profile.SaveCurrentDisplaySettings(SettingsFiles.ProfileNameToFileName(name)),
+                "Could not save display profile " + name);
         }
 
         private void DeleteProfile(string name)
         {
+            ExecuteUiAction(() =>
+            {
+                SettingsFiles.ApplicationSettings.SetHotkeyForProfileName(name, Keys.None);
+                File.Delete(SettingsFiles.ProfileNameToFileName(name));
+            }, "Could not delete display profile " + name);
+        }
+
+        private void ExecuteUiAction(Action action, string errorMessage)
+        {
             try
             {
-                File.Delete(ProfileNameToFileName(name));
+                action();
             }
             catch (Exception ex)
             {
-                HandleError(ex, "Could not delete display profile " + name);
+                notifyIcon.BalloonTipTitle = errorMessage;
+                notifyIcon.BalloonTipText = ex.Message;
+                notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
+                notifyIcon.ShowBalloonTip(5000);
             }
             finally
             {
                 BuildTrayMenu();
+                RefreshHotkeys();
             }
-        }
-
-        private void HandleError(Exception ex, string title)
-        {
-            notifyIcon.BalloonTipTitle = title;
-            notifyIcon.BalloonTipText = ex.Message;
-            notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
-            notifyIcon.ShowBalloonTip(5000);
         }
     }
 }
