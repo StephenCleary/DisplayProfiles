@@ -168,7 +168,7 @@ namespace DisplayProfilesGui
 
             contextMenuStrip.Items.Add(new ToolStripSeparator());
             contextMenuStrip.Items.Add(new ToolStripMenuItem("About", Resources.About.ToBitmap(), OnAbout));
-            contextMenuStrip.Items.Add(new ToolStripMenuItem("Exit", Resources.Exit.ToBitmap(), (_, __) => Application.Exit()));
+            contextMenuStrip.Items.Add(new ToolStripMenuItem("Exit", null, (_, __) => Application.Exit()));
         }
 
         private void OnMenuSaveAs(object sender, EventArgs e)

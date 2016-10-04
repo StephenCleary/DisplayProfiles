@@ -148,15 +148,6 @@
     <None Include="Resources\About.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DeleteProfile.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Exit.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Hotkey.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\MainIcon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -175,7 +166,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\1_002.ico" />
+    <None Include="Resources\Hotkey.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Warning.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DeleteProfile.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
