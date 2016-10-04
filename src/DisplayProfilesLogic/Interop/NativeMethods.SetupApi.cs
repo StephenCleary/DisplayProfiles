@@ -37,10 +37,10 @@ namespace DisplayProfiles.Interop
             public Guid fmtid;
             public uint pid;
 
-            public static DevPropKey Device_FriendlyName => new DevPropKey
+            public static DevPropKey Name => new DevPropKey
             {
-                fmtid = new Guid(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0),
-                pid = 14,
+                fmtid = new Guid(0xb725f130, 0x47ef, 0x101a, 0xa5, 0xf1, 0x02, 0x60, 0x8c, 0x9e, 0xeb, 0xac),
+                pid = 10,
             };
         }
 
@@ -124,7 +124,7 @@ namespace DisplayProfiles.Interop
                 {
                     SpDevInfoData deviceInfoData;
                     SetupDiEnumDeviceInfo(list, out deviceInfoData);
-                    return SetupDiGetDeviceProperty(list, ref deviceInfoData, DevPropKey.Device_FriendlyName);
+                    return SetupDiGetDeviceProperty(list, ref deviceInfoData, DevPropKey.Name);
                 }
                 finally
                 {

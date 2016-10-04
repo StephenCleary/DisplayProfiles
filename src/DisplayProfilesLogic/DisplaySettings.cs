@@ -162,26 +162,14 @@ namespace DisplayProfiles
 
         public sealed class SourceData
         {
-            [JsonConstructor]
-            private SourceData()
-            {
-            }
-
             public SourceData(string name)
             {
                 Name = name;
-                DeviceFriendlyName = TryGetDeviceFriendlyName(name);
             }
 
             public string Name { get; }
-            public string DeviceFriendlyName { get; }
 
-            public override string ToString()
-            {
-                if (!string.IsNullOrEmpty(DeviceFriendlyName))
-                    return DeviceFriendlyName;
-                return Name;
-            }
+            public override string ToString() => Name;
         }
 
         public sealed class TargetData
