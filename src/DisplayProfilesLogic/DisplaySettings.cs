@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using DisplayProfiles.Interop;
+using Newtonsoft.Json;
 
 // Relationship of Mode Information to Path Information:
 //  https://msdn.microsoft.com/en-us/library/windows/hardware/ff569241(v=vs.85).aspx (http://www.webcitation.org/6kzhHphCU)
@@ -32,6 +33,8 @@ namespace DisplayProfiles
         public List<NativeMethods.DisplayConfigPathInfo> PathInfo { get; }
         public List<NativeMethods.DisplayConfigModeInfo> ModeInfo { get; }
         public Dictionary<long, string> AdapterNames { get; }
+
+        [JsonIgnore]
         public List<string> MissingAdapters { get; } = new List<string>();
 
         public void SetCurrent()
