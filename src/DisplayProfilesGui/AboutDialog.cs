@@ -15,8 +15,12 @@ namespace DisplayProfilesGui
         public AboutDialog()
         {
             InitializeComponent();
-            label.Text += Application.ProductVersion;
             settingsFolderLinkLabel.Text = SettingsFiles.SettingsDirectory;
+        }
+
+        private void AboutDialog_Load(object sender, EventArgs e)
+        {
+            Text += Application.ProductVersion;
         }
 
         private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
