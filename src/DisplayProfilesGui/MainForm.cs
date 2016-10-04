@@ -23,6 +23,7 @@ namespace DisplayProfilesGui
         private readonly SortedDictionary<string, DisplaySettings> _profiles = new SortedDictionary<string, DisplaySettings>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
         private readonly Subject<Unit> _rebuild = new Subject<Unit>();
+        private bool _contextMenuIsOpen;
 
         public MainForm()
         {
@@ -33,7 +34,11 @@ namespace DisplayProfilesGui
             _rebuild.Throttle(TimeSpan.FromSeconds(0.5))
                 .ObserveOn(SynchronizationContext.Current)
                 .Subscribe(_ => Rebuild());
+            contextMenuStrip.Opening += (_, __) => _contextMenuIsOpen = true;
+            contextMenuStrip.Closed += (_, __) => _contextMenuIsOpen = false;
         }
+
+        private void RequestRebuild() => _rebuild.OnNext(Unit.Default);
 
         protected override void WndProc(ref Message m)
         {
@@ -43,11 +48,17 @@ namespace DisplayProfilesGui
                 return;
             if (m.WParam != DeviceChangeNotification.NativeMethods.DBT_DEVNODES_CHANGED)
                 return;
-            _rebuild.OnNext(Unit.Default);
+            RequestRebuild();
         }
 
         private void Rebuild()
         {
+            if (_contextMenuIsOpen)
+            {
+                RequestRebuild();
+                return;
+            }
+
             // Load all profile files
             _profiles.Clear();
             var profiles = SettingsFiles.GetProfileNames();
@@ -240,7 +251,7 @@ namespace DisplayProfilesGui
             }
             finally
             {
-                _rebuild.OnNext(Unit.Default);
+                RequestRebuild();
             }
         }
 
