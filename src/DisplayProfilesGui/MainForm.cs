@@ -49,7 +49,7 @@ namespace DisplayProfilesGui
                 }
                 catch (Exception ex)
                 {
-                    HandleError(ex, "Could not read profile " + name);
+                    HandleError(ex, "Could not read display profile " + name);
                 }
             }
 
