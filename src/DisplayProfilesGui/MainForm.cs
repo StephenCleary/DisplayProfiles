@@ -33,9 +33,7 @@ namespace DisplayProfilesGui
 
             if (m.Msg != DeviceChangeNotification.NativeMethods.WM_DEVICECHANGE)
                 return;
-            if (m.WParam == DeviceChangeNotification.NativeMethods.DBT_DEVICEQUERYREMOVE ||
-                m.WParam == DeviceChangeNotification.NativeMethods.DBT_DEVICEREMOVEPENDING ||
-                m.WParam == DeviceChangeNotification.NativeMethods.DBT_QUERYCHANGECONFIG)
+            if (m.WParam != DeviceChangeNotification.NativeMethods.DBT_DEVNODES_CHANGED)
                 return;
             Debug.WriteLine("Saw msg.");
         }
