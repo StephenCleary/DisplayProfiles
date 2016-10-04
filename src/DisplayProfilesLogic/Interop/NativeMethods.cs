@@ -165,7 +165,7 @@ namespace DisplayProfiles.Interop
             public long adapterId;
             public uint id;
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
             public string adapterDevicePath;
         }
 
@@ -231,7 +231,6 @@ namespace DisplayProfiles.Interop
 
         public static string GetAdapterName(long adapterId)
         {
-            // TODO: handle "insufficient buffer" in a reasonable way
             var info = new DisplayConfigAdapterName(adapterId);
             var err = DisplayConfigGetDeviceInfo(ref info);
             if (err != NO_ERROR)
