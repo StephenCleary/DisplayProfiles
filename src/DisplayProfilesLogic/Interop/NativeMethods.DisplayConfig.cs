@@ -56,7 +56,6 @@ namespace DisplayProfiles.Interop
         {
             Source = 1,
             Target = 2,
-            _ = 0xFFFFFFFF
         }
 
         [StructLayout(LayoutKind.Explicit)]
@@ -81,6 +80,9 @@ namespace DisplayProfiles.Interop
 
             [FieldOffset(16)]
             public DisplayConfigSourceMode sourceMode;
+
+            public bool ShouldSerializetargetMode() => infoType == DisplayConfigModeInfoType.Target;
+            public bool ShouldSerializesourceMode() => infoType == DisplayConfigModeInfoType.Source;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
