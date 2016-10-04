@@ -12,7 +12,7 @@ namespace DisplayProfilesGui
     {
         static SettingsFiles()
         {
-            SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DisplayProfiles");
+            SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DisplayProfiles");
             SettingsProfilesDirectory = Path.Combine(SettingsDirectory, "Profiles");
             ApplicationSettingsFilename = Path.Combine(SettingsDirectory, "settings.json");
         }
