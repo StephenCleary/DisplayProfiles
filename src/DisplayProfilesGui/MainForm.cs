@@ -80,9 +80,16 @@ namespace DisplayProfilesGui
 
         private void RefreshHotkeys()
         {
+            // Unregister all hotkeys.
             foreach (var hotkey in _hotkeys)
                 hotkey.Dispose();
             _hotkeys.Clear();
+
+            // Remove any hotkeys for profiles that no longer exist.
+            if (SettingsFiles.ApplicationSettings.Hotkeys.RemoveAll(x => !_profiles.ContainsKey(x.ProfileName)) != 0)
+                SettingsFiles.SaveApplicationSettings();
+
+            // Register hotkeys.
             foreach (var profileHotkey in SettingsFiles.ApplicationSettings.Hotkeys)
             {
                 var name = profileHotkey.ProfileName;
@@ -235,6 +242,7 @@ namespace DisplayProfilesGui
             ExecuteUiAction(() =>
             {
                 SettingsFiles.ApplicationSettings.SetHotkeyForProfileName(name, Keys.None);
+                SettingsFiles.SaveApplicationSettings();
                 File.Delete(SettingsFiles.ProfileNameToFileName(name));
             }, "Could not delete display profile " + name);
         }
