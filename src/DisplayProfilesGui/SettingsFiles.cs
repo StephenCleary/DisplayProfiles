@@ -16,7 +16,7 @@ namespace DisplayProfilesGui
             ApplicationSettingsFilename = Path.Combine(SettingsDirectory, "settings.json");
         }
 
-        private static string SettingsDirectory { get; }
+        public static string SettingsDirectory { get; }
         private static string SettingsProfilesDirectory { get; }
         private static string ApplicationSettingsFilename { get; }
 

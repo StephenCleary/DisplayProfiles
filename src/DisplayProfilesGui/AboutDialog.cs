@@ -16,11 +16,12 @@ namespace DisplayProfilesGui
         {
             InitializeComponent();
             label.Text += Application.ProductVersion;
+            settingsFolderLinkLabel.Text = SettingsFiles.SettingsDirectory;
         }
 
         private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start(linkLabel.Text);
+            Process.Start(((LinkLabel) sender).Text);
             Close();
         }
     }

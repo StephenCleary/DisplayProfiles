@@ -30,40 +30,74 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutDialog));
             this.linkLabel = new System.Windows.Forms.LinkLabel();
-            this.label = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
+            this.settingsFolderLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // linkLabel
             // 
             this.linkLabel.AutoSize = true;
-            this.linkLabel.Location = new System.Drawing.Point(12, 31);
+            this.linkLabel.Location = new System.Drawing.Point(65, 31);
             this.linkLabel.Name = "linkLabel";
-            this.linkLabel.Size = new System.Drawing.Size(242, 13);
+            this.linkLabel.Size = new System.Drawing.Size(276, 13);
             this.linkLabel.TabIndex = 0;
             this.linkLabel.TabStop = true;
-            this.linkLabel.Text = "https://github.com/StephenCleary/DisplayProfiles";
+            this.linkLabel.Text = "https://github.com/StephenCleary/DisplayProfiles/issues";
             this.linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_LinkClicked);
-            // 
-            // label
-            // 
-            this.label.AutoSize = true;
-            this.label.Location = new System.Drawing.Point(12, 9);
-            this.label.Name = "label";
-            this.label.Size = new System.Drawing.Size(127, 13);
-            this.label.TabIndex = 1;
-            this.label.Text = "Display Profile Manager v";
             // 
             // okButton
             // 
             this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.okButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.okButton.Location = new System.Drawing.Point(236, 58);
+            this.okButton.Location = new System.Drawing.Point(308, 78);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 2;
             this.okButton.Text = "OK";
             this.okButton.UseVisualStyleBackColor = true;
+            // 
+            // settingsFolderLinkLabel
+            // 
+            this.settingsFolderLinkLabel.AutoSize = true;
+            this.settingsFolderLinkLabel.Location = new System.Drawing.Point(95, 53);
+            this.settingsFolderLinkLabel.Name = "settingsFolderLinkLabel";
+            this.settingsFolderLinkLabel.Size = new System.Drawing.Size(55, 13);
+            this.settingsFolderLinkLabel.TabIndex = 3;
+            this.settingsFolderLinkLabel.TabStop = true;
+            this.settingsFolderLinkLabel.Text = "linkLabel1";
+            this.settingsFolderLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_LinkClicked);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 31);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(47, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Support:";
+            // 
+            // label
+            // 
+            this.label.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label.Location = new System.Drawing.Point(12, 9);
+            this.label.Name = "label";
+            this.label.Size = new System.Drawing.Size(371, 13);
+            this.label.TabIndex = 1;
+            this.label.Text = "Display Profile Manager v";
+            this.label.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 53);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(77, 13);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Settings folder:";
             // 
             // AboutDialog
             // 
@@ -71,7 +105,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.okButton;
-            this.ClientSize = new System.Drawing.Size(323, 93);
+            this.ClientSize = new System.Drawing.Size(395, 113);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.settingsFolderLinkLabel);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.label);
             this.Controls.Add(this.linkLabel);
@@ -90,7 +127,10 @@
         #endregion
 
         private System.Windows.Forms.LinkLabel linkLabel;
-        private System.Windows.Forms.Label label;
         private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.LinkLabel settingsFolderLinkLabel;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label;
+        private System.Windows.Forms.Label label2;
     }
 }
