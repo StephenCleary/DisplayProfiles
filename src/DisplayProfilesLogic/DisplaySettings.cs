@@ -33,7 +33,7 @@ namespace DisplayProfiles
         public Dictionary<long, AdapterData> Adapters { get; } = new Dictionary<long, AdapterData>();
 
         [JsonIgnore]
-        public HashSet<string> MissingAdapters { get; } = new HashSet<string>();
+        public HashSet<AdapterData> MissingAdapters { get; } = new HashSet<AdapterData>();
 
         public void SetCurrent()
         {
@@ -103,7 +103,7 @@ namespace DisplayProfiles
             var name = Adapters[adapterId].Name;
             if (current.Adapters.All(x => x.Value.Name != name))
             {
-                MissingAdapters.Add(Adapters[adapterId].ToString());
+                MissingAdapters.Add(Adapters[adapterId]);
                 return adapterId;
             }
             return current.Adapters.Where(x => x.Value.Name == name).Select(x => x.Key).First();
@@ -137,8 +137,10 @@ namespace DisplayProfiles
         public sealed class AdapterData
         {
             [JsonConstructor]
-            private AdapterData()
+            private AdapterData(string name, string deviceFriendlyName)
             {
+                Name = name;
+                DeviceFriendlyName = deviceFriendlyName;
             }
 
             public AdapterData(string name)
@@ -175,8 +177,11 @@ namespace DisplayProfiles
         public sealed class TargetData
         {
             [JsonConstructor]
-            private TargetData()
+            private TargetData(string friendlyName, string name, string deviceFriendlyName)
             {
+                FriendlyName = friendlyName;
+                Name = name;
+                DeviceFriendlyName = deviceFriendlyName;
             }
 
             public TargetData(string friendlyName, string name)
@@ -192,10 +197,10 @@ namespace DisplayProfiles
 
             public override string ToString()
             {
-                if (!string.IsNullOrEmpty(FriendlyName))
-                    return FriendlyName;
                 if (!string.IsNullOrEmpty(DeviceFriendlyName))
                     return DeviceFriendlyName;
+                if (!string.IsNullOrEmpty(FriendlyName))
+                    return FriendlyName;
                 return Name;
             }
         }

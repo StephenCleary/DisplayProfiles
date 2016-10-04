@@ -195,7 +195,14 @@ namespace DisplayProfilesGui
         {
             if (profile.MissingAdapters.Count == 0)
                 return ex;
-            return new Exception(ex.Message + "\nThese adapters are missing:\n" + string.Join("\n", profile.MissingAdapters), ex);
+            var message = ex.Message + "\nThese adapters are missing:\n";
+            foreach (var adapter in profile.MissingAdapters)
+            {
+                message += "  " + adapter + ":\n";
+                foreach (var target in adapter.Targets.Values)
+                    message += "    " + target + "\n";
+            }
+            return new Exception(message.TrimEnd(), ex);
         }
 
         private void SaveProfile(string name)
