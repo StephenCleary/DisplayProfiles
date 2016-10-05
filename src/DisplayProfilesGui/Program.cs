@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using DisplayProfiles;
+using Newtonsoft.Json;
 
 namespace DisplayProfilesGui
 {
@@ -15,6 +17,7 @@ namespace DisplayProfilesGui
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Profile.JsonSerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
             SettingsFiles.EnsureCreated();
             using (new MainForm())
                 Application.Run();

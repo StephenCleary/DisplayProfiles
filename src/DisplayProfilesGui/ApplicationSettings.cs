@@ -12,42 +12,42 @@ namespace DisplayProfilesGui
         public List<HotkeySetting> Hotkeys { get; } = new List<HotkeySetting>();
 
         /// <summary>
-        /// Searches the list of hotkeys for one matching the specified profile name. If no hotkey is found, this method returns <c>Keys.None</c>.
+        /// Searches the list of hotkeys for one matching the specified hotkey id (which can be a profile name). If no hotkey is found, this method returns <c>Keys.None</c>.
         /// </summary>
-        /// <param name="profileName">The name of the profile.</param>
-        public Keys FindHotkeyForProfileName(string profileName)
+        /// <param name="id">The name of the profile.</param>
+        public Keys FindHotkey(string id)
         {
-            var result = Hotkeys.FirstOrDefault(x => x.ProfileName == profileName);
+            var result = Hotkeys.FirstOrDefault(x => x.Id == id);
             if (result == null)
                 return Keys.None;
             return result.Hotkey;
         }
 
         /// <summary>
-        /// Sets a hotkey for a profile. If <paramref name="hotkey"/> is <c>Keys.None</c>, then this method removes any hotkey associated with <paramref name="profileName"/>.
+        /// Sets a hotkey for an id (which can be a profile name). If <paramref name="hotkey"/> is <c>Keys.None</c>, then this method removes any hotkey associated with <paramref name="id"/>.
         /// </summary>
-        /// <param name="profileName">The name of the profile.</param>
+        /// <param name="id">The name of the profile.</param>
         /// <param name="hotkey">The hotkey to set, or <c>Keys.None</c> to remove a hotkey.</param>
-        public void SetHotkeyForProfileName(string profileName, Keys hotkey)
+        public void SetHotkey(string id, Keys hotkey)
         {
-            var profile = Hotkeys.FirstOrDefault(x => x.ProfileName == profileName);
-            if (profile == null)
+            var entry = Hotkeys.FirstOrDefault(x => x.Id == id);
+            if (entry == null)
             {
                 if (hotkey == Keys.None)
                     return;
-                profile = new HotkeySetting
+                entry = new HotkeySetting
                 {
-                    ProfileName = profileName,
+                    Id = id,
                     Hotkey = hotkey,
                 };
-                Hotkeys.Add(profile);
+                Hotkeys.Add(entry);
             }
             else
             {
                 if (hotkey == Keys.None)
-                    Hotkeys.Remove(profile);
+                    Hotkeys.Remove(entry);
                 else
-                    profile.Hotkey = hotkey;
+                    entry.Hotkey = hotkey;
             }
         }
     }
