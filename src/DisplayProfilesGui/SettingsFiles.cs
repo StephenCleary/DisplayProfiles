@@ -12,21 +12,14 @@ namespace DisplayProfilesGui
     {
         static SettingsFiles()
         {
-            SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DisplayProfiles");
-            SettingsProfilesDirectory = Path.Combine(SettingsDirectory, "Profiles");
-            ApplicationSettingsFilename = Path.Combine(SettingsDirectory, "settings.json");
+            ApplicationSettingsFilename = Path.Combine(ProfileFiles.SettingsDirectory, "settings.json");
         }
 
-        public static string SettingsDirectory { get; }
-        private static string SettingsProfilesDirectory { get; }
-        private static string ApplicationSettingsFilename { get; }
+        public static string ApplicationSettingsFilename { get; }
 
         public static void EnsureCreated()
         {
-            if (!Directory.Exists(SettingsDirectory))
-                Directory.CreateDirectory(SettingsDirectory);
-            if (!Directory.Exists(SettingsProfilesDirectory))
-                Directory.CreateDirectory(SettingsProfilesDirectory);
+            ProfileFiles.EnsureCreated();
             try
             {
                 ApplicationSettings = JsonConvert.DeserializeObject<ApplicationSettings>(File.ReadAllText(ApplicationSettingsFilename), Profile.JsonSerializerSettings);
@@ -35,21 +28,6 @@ namespace DisplayProfilesGui
             {
                 ApplicationSettings = new ApplicationSettings();
             }
-        }
-
-        public static string ProfileNameToFileName(string profileName)
-        {
-            return Path.Combine(SettingsProfilesDirectory, profileName + ".json");
-        }
-
-        public static string FileNameToProfileName(string fileName)
-        {
-            return Path.GetFileNameWithoutExtension(fileName);
-        }
-
-        public static List<string> GetProfileNames()
-        {
-            return Directory.GetFiles(SettingsProfilesDirectory, "*.json").Select(FileNameToProfileName).OrderBy(x => x, StringComparer.InvariantCultureIgnoreCase).ToList();
         }
 
         public static ApplicationSettings ApplicationSettings { get; private set; }

@@ -134,6 +134,20 @@ namespace DisplayProfiles
             return this;
         }
 
+        public string MissingAdaptersMessage()
+        {
+            if (MissingAdapters.Count == 0)
+                return "";
+            var message = "These adapters are missing:\r\n";
+            foreach (var adapter in MissingAdapters)
+            {
+                message += "  " + adapter + ":\r\n";
+                foreach (var target in adapter.Targets.Values)
+                    message += "    " + target + "\r\n";
+            }
+            return message.TrimEnd();
+        }
+
         public sealed class AdapterData
         {
             [JsonConstructor]

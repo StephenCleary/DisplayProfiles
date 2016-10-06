@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using DisplayProfiles;
 
 namespace DisplayProfilesGui
 {
@@ -16,7 +17,7 @@ namespace DisplayProfilesGui
         public AboutDialog()
         {
             InitializeComponent();
-            settingsFolderLinkLabel.Text = SettingsFiles.SettingsDirectory;
+            settingsFolderLinkLabel.Text = ProfileFiles.SettingsDirectory;
         }
 
         private void AboutDialog_Load(object sender, EventArgs e)

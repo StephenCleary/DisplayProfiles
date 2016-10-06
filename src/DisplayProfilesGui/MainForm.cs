@@ -62,12 +62,12 @@ namespace DisplayProfilesGui
 
             // Load all profile files
             _profiles.Clear();
-            var profiles = SettingsFiles.GetProfileNames();
+            var profiles = ProfileFiles.GetProfileNames();
             foreach (var name in profiles)
             {
                 try
                 {
-                    _profiles.Add(name, Profile.LoadDisplaySettings(SettingsFiles.ProfileNameToFileName(name)));
+                    _profiles.Add(name, ProfileFiles.LoadProfile(name));
                 }
                 catch (Exception ex)
                 {
@@ -120,7 +120,11 @@ namespace DisplayProfilesGui
                 if (ex != null)
                 {
                     item.Image = Resources.Warning.ToBitmap();
-                    item.ToolTipText = AugmentException(ex, profile.Value).Message;
+                    var message = ex.Message;
+                    var extraMessage = profile.Value.MissingAdaptersMessage();
+                    if (extraMessage != "")
+                        message += "\r\n" + extraMessage;
+                    item.ToolTipText = message;
                 }
                 contextMenuStrip.Items.Add(item);
             }
@@ -220,28 +224,17 @@ namespace DisplayProfilesGui
                 }
                 catch (Exception ex)
                 {
-                    throw AugmentException(ex, profile);
+                    var extraMessage = profile.MissingAdaptersMessage();
+                    if (extraMessage == "")
+                        throw;
+                    throw new Exception(ex.Message + "\r\n" + extraMessage, ex);
                 }
             }, "Could not load display profile " + name);
         }
 
-        private static Exception AugmentException(Exception ex, DisplaySettings profile)
-        {
-            if (profile.MissingAdapters.Count == 0)
-                return ex;
-            var message = ex.Message + "\nThese adapters are missing:\n";
-            foreach (var adapter in profile.MissingAdapters)
-            {
-                message += "  " + adapter + ":\n";
-                foreach (var target in adapter.Targets.Values)
-                    message += "    " + target + "\n";
-            }
-            return new Exception(message.TrimEnd(), ex);
-        }
-
         private void SaveProfile(string name)
         {
-            ExecuteUiAction(() => Profile.SaveCurrentDisplaySettings(SettingsFiles.ProfileNameToFileName(name)),
+            ExecuteUiAction(() => ProfileFiles.SaveProfile(name),
                 "Could not save display profile " + name);
         }
 
@@ -251,7 +244,7 @@ namespace DisplayProfilesGui
             {
                 SettingsFiles.ApplicationSettings.SetHotkey(name, Keys.None);
                 SettingsFiles.SaveApplicationSettings();
-                File.Delete(SettingsFiles.ProfileNameToFileName(name));
+                ProfileFiles.DeleteProfile(name);
             }, "Could not delete display profile " + name);
         }
 

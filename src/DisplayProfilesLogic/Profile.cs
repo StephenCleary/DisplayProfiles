@@ -16,8 +16,7 @@ namespace DisplayProfiles
 
         public static DisplaySettings LoadDisplaySettings(string filename)
         {
-            return JsonConvert.DeserializeObject<DisplaySettings>(File.ReadAllText(filename), JsonSerializerSettings)
-                .UpdateAdapterIds();
+            return JsonConvert.DeserializeObject<DisplaySettings>(File.ReadAllText(filename), JsonSerializerSettings);
         }
 
         public static void SaveCurrentDisplaySettings(string filename)
