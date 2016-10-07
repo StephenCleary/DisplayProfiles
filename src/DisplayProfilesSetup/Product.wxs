@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?if $(var.Platform) = x64 ?>
+    <?define bitness = "(64 bit)" ?>
+    <?define Win64 = "yes" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?else ?>
+    <?define bitness = "(32 bit)" ?>
+    <?define Win64 = "no" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?endif ?>
+    
 	<Product Id="*" Name="Display Profiles" Language="1033" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="4b89bbb9-f3e0-4fba-8f47-041db3276b92">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -13,7 +23,7 @@
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFilesFolder">
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
 				<Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
 			</Directory>
 		</Directory>
@@ -21,11 +31,11 @@
 
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-			 <Component Id="CmdExe">
+			 <Component Id="CmdExe" Win64="$(var.Win64)">
          <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
          <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
 			 </Component> 
-			 <Component Id="GuiExe">
+			 <Component Id="GuiExe" Win64="$(var.Win64)">
          <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
 			 </Component> 
 		</ComponentGroup>
