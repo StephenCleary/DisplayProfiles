@@ -9,6 +9,7 @@
     </BootstrapperApplicationRef>
 
 		<Chain>
+      <PackageGroupRef Id="NetFx46Web"/>
       <MsiPackage Id="x64" InstallCondition="VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x64.TargetPath)"/>
       <MsiPackage Id="x86" InstallCondition="NOT VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x86.TargetPath)"/>
 		</Chain>

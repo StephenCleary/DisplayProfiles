@@ -32,6 +32,10 @@
     <Compile Include="Bundle.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <WixExtension Include="WixNetFxExtension">
+      <HintPath>$(WixExtDir)\WixNetFxExtension.dll</HintPath>
+      <Name>WixNetFxExtension</Name>
+    </WixExtension>
     <WixExtension Include="WixBalExtension">
       <HintPath>$(WixExtDir)\WixBalExtension.dll</HintPath>
       <Name>WixBalExtension</Name>
