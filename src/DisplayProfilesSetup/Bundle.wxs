@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+	<Bundle Name="Display Profiles" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="92065759-d629-4541-965e-54ebeef14a62">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
+      <bal:WixStandardBootstrapperApplication
+        LicenseUrl=""
+        SuppressOptionsUI="yes"
+      />
+    </BootstrapperApplicationRef>
+
+		<Chain>
+      <MsiPackage Id="x64" InstallCondition="VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x64.TargetPath)"/>
+      <MsiPackage Id="x86" InstallCondition="NOT VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x86.TargetPath)"/>
+		</Chain>
+	</Bundle>
+</Wix>
