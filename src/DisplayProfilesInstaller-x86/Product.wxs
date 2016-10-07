@@ -1,47 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?if $(var.Platform) = x64 ?>
-    <?define bitness = "(64 bit)" ?>
-    <?define Win64 = "yes" ?>
-    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define bitness = "(64 bit)" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?else ?>
-    <?define bitness = "(32 bit)" ?>
-    <?define Win64 = "no" ?>
-    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define bitness = "(32 bit)" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?endif ?>
-    
-	<Product Id="*" Name="Display Profiles" Language="1033" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="4b89bbb9-f3e0-4fba-8f47-041db3276b92">
-		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-		<MediaTemplate EmbedCab="yes" />
+  <Product Id="*" Name="Display Profiles" Language="1033" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="4b89bbb9-f3e0-4fba-8f47-041db3276b92">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-		<Feature Id="ProductFeature" Title="Display Profiles" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="Display Profiles" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="ApplicationShortcut"/>
-		</Feature>
-	</Product>
+    </Feature>
+  </Product>
 
-	<Fragment>
-		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="$(var.PlatformProgramFilesFolder)">
-				<Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
-			</Directory>
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
+      </Directory>
       <Directory Id="ProgramMenuFolder">
         <Directory Id="ApplicationProgramsFolder" Name="Display Profiles"/>
       </Directory>
-		</Directory>
-	</Fragment>
+    </Directory>
+  </Fragment>
 
-	<Fragment>
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-			 <Component Id="CmdExe" Win64="$(var.Win64)">
-         <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
-         <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
-			 </Component> 
-			 <Component Id="GuiExe" Win64="$(var.Win64)">
-         <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
-			 </Component>
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="CmdExe" Win64="$(var.Win64)">
+        <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
+        <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
+      </Component>
+      <Component Id="GuiExe" Win64="$(var.Win64)">
+        <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
+      </Component>
+      <Component Id="RegistryEntries" Guid="305F0EA5-17C2-469F-9971-C22BEB6911C5">
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="Display Profiles System Tray Icon" Value="[INSTALLFOLDER]DisplayProfilesGui.exe" Type="string" />
+      </Component>
     </ComponentGroup>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="01B2BEAF-0984-4855-9990-15787BED6672">

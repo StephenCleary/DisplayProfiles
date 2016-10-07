@@ -8,6 +8,13 @@
       />
     </BootstrapperApplicationRef>
 
+    <!--
+    Custom UI,
+    Launch on exit with special command line that brings up notification balloon "Installed!",
+    disable multiple instances,
+    AppVeyor build and deployment: https://www.appveyor.com/docs/deployment/azure-blob/
+    -->
+    
 		<Chain>
       <PackageGroupRef Id="NetFx46Web"/>
       <MsiPackage Id="x64" InstallCondition="VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x64.TargetPath)"/>
