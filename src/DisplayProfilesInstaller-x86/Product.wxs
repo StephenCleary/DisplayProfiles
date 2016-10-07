@@ -37,7 +37,7 @@
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			 <Component Id="CmdExe" Win64="$(var.Win64)">
          <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
-         <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
+         <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
 			 </Component> 
 			 <Component Id="GuiExe" Win64="$(var.Win64)">
          <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
