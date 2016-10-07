@@ -23,6 +23,7 @@
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			 <Component Id="CmdExe">
          <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
+         <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
 			 </Component> 
 			 <Component Id="GuiExe">
          <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
