@@ -18,6 +18,7 @@
 
 		<Feature Id="ProductFeature" Title="Display Profiles" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut"/>
 		</Feature>
 	</Product>
 
@@ -26,6 +27,9 @@
 			<Directory Id="$(var.PlatformProgramFilesFolder)">
 				<Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
 			</Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Display Profiles"/>
+      </Directory>
 		</Directory>
 	</Fragment>
 
@@ -37,7 +41,14 @@
 			 </Component> 
 			 <Component Id="GuiExe" Win64="$(var.Win64)">
          <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
-			 </Component> 
-		</ComponentGroup>
-	</Fragment>
+			 </Component>
+    </ComponentGroup>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="01B2BEAF-0984-4855-9990-15787BED6672">
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="Display Profiles" Description="Manage display profiles" Target="[INSTALLFOLDER]DisplayProfilesGui.exe" WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\DisplayProfiles" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
 </Wix>
