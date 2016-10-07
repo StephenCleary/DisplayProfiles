@@ -11,7 +11,7 @@
     <!--
     Custom UI,
     Launch on exit with special command line that brings up notification balloon "Installed!",
-    disable multiple instances,
+    Need to do anything about uninstalling while running?
     AppVeyor build and deployment: https://www.appveyor.com/docs/deployment/azure-blob/
     -->
     
