@@ -26,7 +26,7 @@ namespace DisplayProfilesGui
         private readonly Subject<Unit> _rebuild = new Subject<Unit>();
         private bool _contextMenuIsOpen;
 
-        public MainForm()
+        public MainForm(bool showInstalledMessage)
         {
             InitializeComponent();
             notifyIcon.Icon = Resources.MainIcon;
@@ -37,6 +37,8 @@ namespace DisplayProfilesGui
                 .Subscribe(_ => Rebuild());
             contextMenuStrip.Opening += (_, __) => _contextMenuIsOpen = true;
             contextMenuStrip.Closed += (_, __) => _contextMenuIsOpen = false;
+            if (showInstalledMessage)
+                BalloonTip("Display Profiles", "Display Profiles has been successfully installed and is now running.", ToolTipIcon.Info);
         }
 
         private void RequestRebuild() => _rebuild.OnNext(Unit.Default);
@@ -100,10 +102,7 @@ namespace DisplayProfilesGui
                 }
                 catch (Exception ex)
                 {
-                    notifyIcon.BalloonTipTitle = "Could not bind hotkey " + WinFormsHotkey.HotkeyString(hotkeySetting.Hotkey) + " to " + SystemCommands.GetTitle(id);
-                    notifyIcon.BalloonTipText = ex.Message;
-                    notifyIcon.BalloonTipIcon = ToolTipIcon.Warning;
-                    notifyIcon.ShowBalloonTip(5000);
+                    BalloonTip("Could not bind hotkey " + WinFormsHotkey.HotkeyString(hotkeySetting.Hotkey) + " to " + SystemCommands.GetTitle(id), ex.Message, ToolTipIcon.Warning);
                 }
             }
         }
@@ -301,11 +300,13 @@ namespace DisplayProfilesGui
             }
         }
 
-        private void HandleError(Exception ex, string message)
+        private void HandleError(Exception ex, string message) => BalloonTip(message, ex.Message, ToolTipIcon.Error);
+
+        private void BalloonTip(string title, string text, ToolTipIcon icon)
         {
-            notifyIcon.BalloonTipTitle = message;
-            notifyIcon.BalloonTipText = ex.Message;
-            notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
+            notifyIcon.BalloonTipTitle = title;
+            notifyIcon.BalloonTipText = text;
+            notifyIcon.BalloonTipIcon = icon;
             notifyIcon.ShowBalloonTip(5000);
         }
     }
