@@ -35,7 +35,7 @@ namespace DisplayProfilesGui
                     Application.SetCompatibleTextRenderingDefault(false);
                     Profile.JsonSerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
                     SettingsFiles.EnsureCreated();
-                    using (new MainForm(args[0] == "installed"))
+                    using (new MainForm(args.Length != 0 && args[0] == "installed"))
                         Application.Run();
                 }
                 else if (args[0] == "exit")
