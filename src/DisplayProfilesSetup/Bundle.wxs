@@ -2,10 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
 	<Bundle Name="Display Profiles" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="92065759-d629-4541-965e-54ebeef14a62">
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
-      <bal:WixStandardBootstrapperApplication
-        LicenseUrl=""
-        SuppressOptionsUI="yes"
-      />
+      <bal:WixStandardBootstrapperApplication LicenseUrl="" SuppressOptionsUI="yes"/>
     </BootstrapperApplicationRef>
 
     <!--
@@ -13,6 +10,8 @@
     Launch on exit with special command line that brings up notification balloon "Installed!",
     Need to do anything about uninstalling while running?
     AppVeyor build and deployment: https://www.appveyor.com/docs/deployment/azure-blob/
+    Web-based .NET install.
+    http://stackoverflow.com/questions/626033/how-can-i-set-the-wix-installer-version-to-the-curent-build-version
     -->
     
 		<Chain>
