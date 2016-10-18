@@ -38,7 +38,7 @@
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="CmdExe" Win64="$(var.Win64)">
+      <Component Id="CmdExe" Win64="$(var.Win64)" Guid="{CD59AB76-06D1-4A0C-9623-668003661FF4}">
         <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
       </Component>
       <Component Id="PathPerMachine" Win64="$(var.Win64)" Guid="7DCFD2AD-0445-4792-91CA-99ABEC853D75">
@@ -51,7 +51,7 @@
         <Environment Id="PathPerUser" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="no"/>
         <RegistryValue Root="HKMU" Key="Software\Microsoft\DisplayProfiles" Name="PathUpdated" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
-      <Component Id="GuiExe" Win64="$(var.Win64)">
+      <Component Id="GuiExe" Win64="$(var.Win64)" Guid="{41B7CD5C-F837-41B6-8270-3C3A042DEC63}">
         <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
       </Component>
       <Component Id="RegistryEntries" Win64="$(var.Win64)" Guid="305F0EA5-17C2-469F-9971-C22BEB6911C5">
