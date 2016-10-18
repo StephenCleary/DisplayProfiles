@@ -7,8 +7,6 @@
 
     <!--
     Custom UI,
-    Launch on exit with special command line that brings up notification balloon "Installed!",
-    Need to do anything about uninstalling while running?
     AppVeyor build and deployment: https://www.appveyor.com/docs/deployment/azure-blob/
     Web-based .NET install.
     http://stackoverflow.com/questions/626033/how-can-i-set-the-wix-installer-version-to-the-curent-build-version

@@ -26,6 +26,9 @@
     <Property Id="ALLUSERS" Value="2"/>
     <Property Id="MSIINSTALLPERUSER" Value="1"/>
 
+    <!-- Prevent "close applications that are in use" dialog -->
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
+      
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)">
         <Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
