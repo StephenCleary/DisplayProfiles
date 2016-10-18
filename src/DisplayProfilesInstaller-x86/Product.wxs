@@ -67,18 +67,11 @@
     </DirectoryRef>
     
     <!-- Close the application at the beginning of install/uninstall. -->
-    <util:CloseApplication Target="DisplayProfilesGui" Property="CLOSEAPP"/>
-    <SetProperty Id="CloseDisplayProfiles" Sequence="execute" Value="&quot;[#GuiExe]&quot; exit" Before="CloseDisplayProfiles" />
-    <CustomAction Id="CloseDisplayProfiles" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)" Execute="deferred" Return="check" Impersonate="yes"/>
+    <SetProperty Id="CloseDisplayProfiles" Sequence="execute" Value="&quot;[WindowsFolder]\System32\taskkill.exe&quot; /F /IM DisplayProfilesGui.exe" Before="CloseDisplayProfiles" />
+    <CustomAction Id="CloseDisplayProfiles" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)" Execute="deferred" Return="ignore" Impersonate="yes"/>
 
-    <InstallUISequence>
-      <Custom Action="WixCloseApplications" After="AppSearch"/>
-    </InstallUISequence>
     <InstallExecuteSequence>
-      <Custom Action="WixCloseApplications" After="AppSearch"/>
-      <Custom Action="CloseDisplayProfiles" After="InstallInitialize">
-        CLOSEAPP
-      </Custom>
+      <Custom Action="CloseDisplayProfiles" After="InstallInitialize"/>
     </InstallExecuteSequence>
 </Fragment>
 </Wix>
