@@ -10,15 +10,15 @@
   <?define WixQuietExec = "WixQuietExec" ?>
   <?endif ?>
 
-  <Product Id="*" Name="Display Profiles" Language="1033" Version="1.0.0" Manufacturer="Stephen Cleary" UpgradeCode="4b89bbb9-f3e0-4fba-8f47-041db3276b92">
+  <Product Id="*" Name="Display Profiles" Language="1033" Version="!(bind.FileVersion.File.GuiExe)" Manufacturer="Stephen Cleary" UpgradeCode="4b89bbb9-f3e0-4fba-8f47-041db3276b92">
     <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="ProductFeature" Title="Display Profiles" Level="1">
-      <ComponentGroupRef Id="ProductComponents" />
-      <ComponentRef Id="ApplicationShortcut"/>
+    <Feature Id="Feature.All" Title="Display Profiles" Level="1">
+      <ComponentGroupRef Id="ComponentGroup.All" />
+      <ComponentRef Id="Component.ApplicationShortcut"/>
     </Feature>
   </Product>
 
@@ -34,51 +34,52 @@
         <Directory Id="INSTALLFOLDER" Name="DisplayProfiles" />
       </Directory>
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="Display Profiles"/>
+        <Directory Id="Directory.ApplicationProgramsFolder" Name="Display Profiles"/>
       </Directory>
     </Directory>
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="CmdExe" Win64="$(var.Win64)" Guid="{CD59AB76-06D1-4A0C-9623-668003661FF4}">
+    <ComponentGroup Id="ComponentGroup.All" Directory="INSTALLFOLDER">
+      <Component Id="Component.GuiExe" Win64="$(var.Win64)" Guid="{41B7CD5C-F837-41B6-8270-3C3A042DEC63}">
+        <File Id="File.GuiExe" Source="$(var.DisplayProfilesGui.TargetPath)"/>
+      </Component>
+      <Component Id="Component.CmdExe" Win64="$(var.Win64)" Guid="{CD59AB76-06D1-4A0C-9623-668003661FF4}">
         <File Source="$(var.DisplayProfilesCmd.TargetPath)"/>
       </Component>
-      <Component Id="PathPerMachine" Win64="$(var.Win64)" Guid="7DCFD2AD-0445-4792-91CA-99ABEC853D75">
+      <Component Id="Component.PathPerMachine" Win64="$(var.Win64)" Guid="7DCFD2AD-0445-4792-91CA-99ABEC853D75">
         <Condition>ALLUSERS = 1 OR (ALLUSERS = 2 AND MSIINSTALLPERUSER = 1)</Condition>
-        <Environment Id="PathPerMachine" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes"/>
+        <Environment Id="Environment.PathPerMachine" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes"/>
         <RegistryValue Root="HKMU" Key="Software\Microsoft\DisplayProfiles" Name="PathUpdated" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
-      <Component Id="PathPerUser" Win64="$(var.Win64)" Guid="1B3F4D8E-D77D-482A-9D28-10C1202A1DA3">
+      <Component Id="Component.PathPerUser" Win64="$(var.Win64)" Guid="1B3F4D8E-D77D-482A-9D28-10C1202A1DA3">
         <Condition>NOT (ALLUSERS = 1 OR (ALLUSERS = 2 AND MSIINSTALLPERUSER = 1))</Condition>
-        <Environment Id="PathPerUser" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="no"/>
+        <Environment Id="Environment.PathPerUser" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="no"/>
         <RegistryValue Root="HKMU" Key="Software\Microsoft\DisplayProfiles" Name="PathUpdated" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
-      <Component Id="GuiExe" Win64="$(var.Win64)" Guid="{41B7CD5C-F837-41B6-8270-3C3A042DEC63}">
-        <File Source="$(var.DisplayProfilesGui.TargetPath)"/>
-      </Component>
-      <Component Id="RegistryEntries" Win64="$(var.Win64)" Guid="305F0EA5-17C2-469F-9971-C22BEB6911C5">
+      <Component Id="Component.RegistryEntries" Win64="$(var.Win64)" Guid="305F0EA5-17C2-469F-9971-C22BEB6911C5">
         <RegistryValue Root="HKMU" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="Display Profiles System Tray Icon" Value="[INSTALLFOLDER]DisplayProfilesGui.exe" Type="string" />
       </Component>
     </ComponentGroup>
-    <DirectoryRef Id="ApplicationProgramsFolder">
-      <Component Id="ApplicationShortcut" Win64="$(var.Win64)" Guid="01B2BEAF-0984-4855-9990-15787BED6672">
-        <Shortcut Id="ApplicationStartMenuShortcut" Name="Display Profiles" Description="Manage display profiles" Target="[INSTALLFOLDER]DisplayProfilesGui.exe" WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
-        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+    
+    <DirectoryRef Id="Directory.ApplicationProgramsFolder">
+      <Component Id="Component.ApplicationShortcut" Win64="$(var.Win64)" Guid="01B2BEAF-0984-4855-9990-15787BED6672">
+        <Shortcut Id="Shortcut.ApplicationStartMenuShortcut" Name="Display Profiles" Description="Manage display profiles" Target="[INSTALLFOLDER]DisplayProfilesGui.exe" WorkingDirectory="INSTALLFOLDER"/>
+        <RemoveFolder Id="Directory.ApplicationProgramsFolder" On="uninstall"/>
         <RegistryValue Root="HKCU" Key="Software\Microsoft\DisplayProfiles" Name="ApplicationShortcutInstalled" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
     </DirectoryRef>
     
     <!-- Close the application at the beginning of install/uninstall. -->
-    <SetProperty Id="CloseDisplayProfiles" Sequence="execute" Value="&quot;[WindowsFolder]\System32\taskkill.exe&quot; /F /IM DisplayProfilesGui.exe" Before="CloseDisplayProfiles"/>
-    <CustomAction Id="CloseDisplayProfiles" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)" Execute="deferred" Return="ignore" Impersonate="yes"/>
+    <SetProperty Id="CustomAction.CloseDisplayProfiles" Sequence="execute" Value="&quot;[WindowsFolder]\System32\taskkill.exe&quot; /F /IM DisplayProfilesGui.exe" Before="CustomAction.CloseDisplayProfiles"/>
+    <CustomAction Id="CustomAction.CloseDisplayProfiles" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)" Execute="deferred" Return="ignore" Impersonate="yes"/>
 
     <!-- Run the application after install. -->
-    <CustomAction Id="RunDisplayProfiles" FileKey="DisplayProfilesGui.exe" ExeCommand="installed" Execute="deferred" Impersonate="yes" Return="asyncNoWait"/>
+    <CustomAction Id="CustomAction.RunDisplayProfiles" FileKey="File.GuiExe" ExeCommand="installed" Execute="deferred" Impersonate="yes" Return="asyncNoWait"/>
     
     <InstallExecuteSequence>
-      <Custom Action="CloseDisplayProfiles" After="InstallInitialize"/>
-      <Custom Action="RunDisplayProfiles" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="CustomAction.CloseDisplayProfiles" After="InstallInitialize"/>
+      <Custom Action="CustomAction.RunDisplayProfiles" Before="InstallFinalize">NOT Installed</Custom>
     </InstallExecuteSequence>
 </Fragment>
 </Wix>
