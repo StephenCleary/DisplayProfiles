@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
-	<Bundle Name="Display Profiles" Version="!(bind.packageVersion.Package.x64)" Manufacturer="Stephen Cleary" UpgradeCode="92065759-d629-4541-965e-54ebeef14a62">
+	<Bundle Name="Display Profiles" Version="!(bind.packageVersion.Package.x64)" Manufacturer="Stephen Cleary" UpgradeCode="92065759-d629-4541-965e-54ebeef14a62"
+          AboutUrl="http://displayprofiles.apps.stephencleary.com/"
+          HelpUrl="https://github.com/StephenCleary/DisplayProfiles/issues"
+          DisableModify="yes"
+          IconSourceFile="..\DisplayProfilesGui\Resources\MainIcon.ico">
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
-      <bal:WixStandardBootstrapperApplication LicenseUrl="" SuppressOptionsUI="yes"/>
+      <bal:WixStandardBootstrapperApplication
+        LicenseUrl="https://raw.githubusercontent.com/StephenCleary/DisplayProfiles/master/LICENSE"
+        SuppressOptionsUI="yes"
+        LogoFile="..\..\icons\marmalade-icons-by-icojam\png\64x64\1_112.png"
+        ShowVersion="yes"/>
     </BootstrapperApplicationRef>
 
     <!--
