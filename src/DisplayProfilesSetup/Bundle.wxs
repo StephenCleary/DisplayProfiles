@@ -10,7 +10,8 @@
         LicenseUrl="https://raw.githubusercontent.com/StephenCleary/DisplayProfiles/master/LICENSE"
         SuppressOptionsUI="yes"
         LogoFile="..\..\icons\marmalade-icons-by-icojam\png\64x64\1_112.png"
-        ShowVersion="yes"/>
+        ShowVersion="yes"
+        LocalizationFile="en-us.wxl"/>
     </BootstrapperApplicationRef>
 
     <!--
