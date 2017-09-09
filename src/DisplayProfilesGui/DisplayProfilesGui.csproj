@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="ApplicationSettings.cs" />
     <Compile Include="DeviceChangeNotification\NativeMethods.cs" />
+    <Compile Include="Exceptional.cs" />
     <Compile Include="HotkeySetting.cs" />
     <Compile Include="Hotkeys\ApplicationHotkeyManager.cs" />
     <Compile Include="Hotkeys\Hotkey.cs" />

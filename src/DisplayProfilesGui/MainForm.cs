@@ -21,7 +21,7 @@ namespace DisplayProfilesGui
 {
     public partial class MainForm : Form
     {
-        private readonly SortedDictionary<string, DisplaySettings> _profiles = new SortedDictionary<string, DisplaySettings>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly SortedDictionary<string, Exceptional<DisplaySettings>> _profiles = new SortedDictionary<string, Exceptional<DisplaySettings>>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
         private readonly Subject<Unit> _rebuild = new Subject<Unit>();
         private bool _contextMenuIsOpen;
@@ -67,14 +67,7 @@ namespace DisplayProfilesGui
             var profiles = ProfileFiles.GetProfileNames();
             foreach (var name in profiles)
             {
-                try
-                {
-                    _profiles.Add(name, ProfileFiles.LoadProfile(name));
-                }
-                catch (Exception ex)
-                {
-                    HandleError(ex, "Could not read display profile " + name);
-                }
+                _profiles.Add(name, Exceptional.Create(() => ProfileFiles.LoadProfile(name)));
             }
 
             BuildTrayMenu();
@@ -112,16 +105,18 @@ namespace DisplayProfilesGui
             contextMenuStrip.Items.Clear();
 
             // Add to load menu
-            foreach (var profile in _profiles)
+            foreach (var kvp in _profiles)
             {
-                var item = new ToolStripMenuItem(profile.Key, Resources.Profile.ToBitmap(), (_, __) => LoadProfile(profile.Key));
-                var ex = profile.Value.Validate();
+                var name = kvp.Key;
+                var profile = kvp.Value;
+                var item = new ToolStripMenuItem(name, Resources.Profile.ToBitmap(), (_, __) => LoadProfile(name));
+                var ex = profile.Exception ?? profile.Value.Validate();
                 if (ex != null)
                 {
                     item.Image = Resources.Warning.ToBitmap();
                     var message = ex.Message;
-                    var extraMessage = profile.Value.MissingAdaptersMessage();
-                    if (extraMessage != "")
+                    var extraMessage = profile.TryValue?.MissingAdaptersMessage();
+                    if (!string.IsNullOrEmpty(extraMessage))
                         message += "\r\n" + extraMessage;
                     item.ToolTipText = message;
                 }
@@ -219,12 +214,12 @@ namespace DisplayProfilesGui
                 var profile = _profiles[name];
                 try
                 {
-                    profile.SetCurrent();
+                    profile.Value.SetCurrent();
                 }
                 catch (Exception ex)
                 {
-                    var extraMessage = profile.MissingAdaptersMessage();
-                    if (extraMessage == "")
+                    var extraMessage = profile.TryValue?.MissingAdaptersMessage();
+                    if (!string.IsNullOrEmpty(extraMessage))
                         throw;
                     throw new Exception(ex.Message + "\r\n" + extraMessage, ex);
                 }
