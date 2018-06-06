@@ -20,7 +20,7 @@
     -->
     
 		<Chain>
-      <PackageGroupRef Id="NetFx46Web"/>
+      <PackageGroupRef Id="NetFx461Web"/>
       <MsiPackage Id="Package.x64" InstallCondition="VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x64.TargetPath)"/>
       <MsiPackage Id="Package.x86" InstallCondition="NOT VersionNT64" SourceFile="$(var.DisplayProfilesInstaller-x86.TargetPath)"/>
 		</Chain>
