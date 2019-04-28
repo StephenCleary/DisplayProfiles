@@ -17,6 +17,7 @@ using DisplayProfiles;
 using DisplayProfilesGui.Hotkeys;
 using DisplayProfilesGui.Properties;
 using Nito;
+using Polly;
 
 namespace DisplayProfilesGui
 {
@@ -25,6 +26,11 @@ namespace DisplayProfilesGui
         private readonly SortedDictionary<string, Try<DisplaySettings>> _profiles = new SortedDictionary<string, Try<DisplaySettings>>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
         private readonly Subject<Unit> _rebuild = new Subject<Unit>();
+        private readonly AsyncPolicy _retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(new[]
+        {
+            TimeSpan.FromSeconds(1),
+            TimeSpan.FromSeconds(2),
+        });
         private bool _contextMenuIsOpen;
 
         public MainForm(bool showInstalledMessage)
@@ -211,20 +217,27 @@ namespace DisplayProfilesGui
 
         private void LoadProfile(string name)
         {
-            ExecuteUiAction(() =>
+            ExecuteUiAction(async () =>
             {
-                var profile = _profiles[name];
+                var tryProfile = _profiles[name];
+                DisplaySettings profile;
                 try
                 {
-                    profile.Value.SetCurrent();
+                    profile = tryProfile.Value;
                 }
                 catch (Exception ex)
                 {
-                    var extraMessage = profile.Match(_ => null, value => value.MissingAdaptersMessage());
+                    var extraMessage = tryProfile.Match(_ => null, value => value.MissingAdaptersMessage());
                     if (!string.IsNullOrEmpty(extraMessage))
                         throw;
                     throw new Exception(ex.Message + "\r\n" + extraMessage, ex);
                 }
+
+                await _retryPolicy.ExecuteAsync(() =>
+                {
+                    profile.SetCurrent();
+                    return Task.CompletedTask;
+                });
             }, "Could not load display profile " + name);
         }
 
