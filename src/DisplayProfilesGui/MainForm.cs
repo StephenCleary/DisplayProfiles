@@ -55,10 +55,11 @@ namespace DisplayProfilesGui
             RequestRebuild();
         }
 
-        private void Rebuild()
+        private async void Rebuild()
         {
             if (_contextMenuIsOpen)
             {
+                await Task.Yield();
                 RequestRebuild();
                 return;
             }
