@@ -16,12 +16,13 @@ using System.Windows.Forms;
 using DisplayProfiles;
 using DisplayProfilesGui.Hotkeys;
 using DisplayProfilesGui.Properties;
+using Nito;
 
 namespace DisplayProfilesGui
 {
     public partial class MainForm : Form
     {
-        private readonly SortedDictionary<string, Exceptional<DisplaySettings>> _profiles = new SortedDictionary<string, Exceptional<DisplaySettings>>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly SortedDictionary<string, Try<DisplaySettings>> _profiles = new SortedDictionary<string, Try<DisplaySettings>>(StringComparer.InvariantCultureIgnoreCase);
         private readonly List<WinFormsHotkey> _hotkeys = new List<WinFormsHotkey>();
         private readonly Subject<Unit> _rebuild = new Subject<Unit>();
         private bool _contextMenuIsOpen;
@@ -67,7 +68,7 @@ namespace DisplayProfilesGui
             var profiles = ProfileFiles.GetProfileNames();
             foreach (var name in profiles)
             {
-                _profiles.Add(name, Exceptional.Create(() => ProfileFiles.LoadProfile(name)));
+                _profiles.Add(name, Try.Create(() => ProfileFiles.LoadProfile(name)));
             }
 
             BuildTrayMenu();
@@ -115,7 +116,7 @@ namespace DisplayProfilesGui
                 {
                     item.Image = Resources.Warning.ToBitmap();
                     var message = ex.Message;
-                    var extraMessage = profile.TryValue?.MissingAdaptersMessage();
+                    var extraMessage = profile.Match(_ => null, value => value.MissingAdaptersMessage());
                     if (!string.IsNullOrEmpty(extraMessage))
                         message += "\r\n" + extraMessage;
                     item.ToolTipText = message;
@@ -218,7 +219,7 @@ namespace DisplayProfilesGui
                 }
                 catch (Exception ex)
                 {
-                    var extraMessage = profile.TryValue?.MissingAdaptersMessage();
+                    var extraMessage = profile.Match(_ => null, value => value.MissingAdaptersMessage());
                     if (!string.IsNullOrEmpty(extraMessage))
                         throw;
                     throw new Exception(ex.Message + "\r\n" + extraMessage, ex);
